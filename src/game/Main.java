@@ -2,7 +2,7 @@ package game;
 
 import java.util.Random;
 
-import engine.Texture;
+import engine.Renderer;
 import engine.Window;
 
 public class Main {
@@ -12,22 +12,25 @@ public class Main {
 		
 		Window window = new Window(width, height, "Sitron Rasterizer!!!");
 		
-		Texture tex = new Texture(width, height);
-
+		Renderer renderer = new Renderer(width, height);
+		
+		float timer = 0.0f;
+		
 		// Main loop
 		boolean running = true;
 		while(running) // JFrame is running on a different thread
 		{
-			Random r = new Random();
-			for(int x = 0; x < width; x++)
-			{
-				for(int y = 0; y < height; y++)
-				{
-					tex.SetPixel(x, y, r.nextInt() % 255, 0, 0, 255);
-				}
-			}
+			renderer.ClearRenderTexture(50, 50, 50);
 			
-			window.ShowBuffer(tex);
+			timer += 0.01f;
+			renderer.DrawLine(
+				50, 
+				50, 
+				(int) (50 + 20 * Math.cos(timer)), 
+				(int) (50 + 20 * Math.sin(timer))
+			);
+			
+			window.ShowBuffer(renderer.GetRenderTexture());
 		}
 	}
 }

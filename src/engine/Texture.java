@@ -37,6 +37,17 @@ public class Texture {
 		}
 	}
 	
+	public void SetToColor(int red, int green, int blue, int alpha)
+	{
+		for(int i = 0; i < m_width * m_height; i++)
+		{
+			m_colorChannels[i*NUM_COLOR_CHANNELS + 0] = (byte) red;
+			m_colorChannels[i*NUM_COLOR_CHANNELS + 1] = (byte) green;
+			m_colorChannels[i*NUM_COLOR_CHANNELS + 2] = (byte) blue;
+			m_colorChannels[i*NUM_COLOR_CHANNELS + 3] = (byte) alpha;
+		}
+	}
+	
 	public int GetWidth() { return m_width; }
 	public int GetHeight() { return m_height; }
 }

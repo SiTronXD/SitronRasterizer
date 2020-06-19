@@ -57,8 +57,8 @@ public class Window extends Canvas
 			m_windowTexture, 
 			0, 
 			0, 
-			m_windowSize.width + 10, 	// Weird borders? Simple fix
-			m_windowSize.height + 10, 
+			m_windowSize.width*6 + 10, 	// Weird borders? Simple fix
+			m_windowSize.height*6 + 10, 
 			null
 		);
 		
