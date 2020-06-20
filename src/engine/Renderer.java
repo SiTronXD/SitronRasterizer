@@ -28,15 +28,23 @@ public class Renderer {
 		Vertex transformedV2 = v2.Transform(transform);
 		Vertex transformedV3 = v3.Transform(transform);
 		
+		// Perspective divide
+		transformedV1.GetPosition().Div(transformedV1.GetPosition().w, transformedV1.GetPosition().w, transformedV1.GetPosition().w, transformedV1.GetPosition().w);
+		transformedV2.GetPosition().Div(transformedV2.GetPosition().w, transformedV2.GetPosition().w, transformedV2.GetPosition().w, transformedV2.GetPosition().w);
+		transformedV3.GetPosition().Div(transformedV3.GetPosition().w, transformedV3.GetPosition().w, transformedV3.GetPosition().w, transformedV3.GetPosition().w);
+		
+		//System.out.println("v1: " + transformedV1.GetPosition().GetString());
+		//System.out.println("v2: " + transformedV2.GetPosition().GetString());
+		//System.out.println("v3: " + transformedV3.GetPosition().GetString());
+		
 		// NDC space --> screen space
 		transformedV1 = transformedV1.Transform(m_screenSpaceTransform);
 		transformedV2 = transformedV2.Transform(m_screenSpaceTransform);
 		transformedV3 = transformedV3.Transform(m_screenSpaceTransform);
 		
-		// Perspective divide
-		transformedV1.GetPosition().Div(transformedV1.GetPosition().w, transformedV1.GetPosition().w, transformedV1.GetPosition().w, 1.0f);
-		transformedV2.GetPosition().Div(transformedV2.GetPosition().w, transformedV1.GetPosition().w, transformedV1.GetPosition().w, 1.0f);
-		transformedV3.GetPosition().Div(transformedV3.GetPosition().w, transformedV1.GetPosition().w, transformedV1.GetPosition().w, 1.0f);
+		//System.out.println("after v1: " + transformedV1.GetPosition().GetString());
+		//System.out.println("after v2: " + transformedV2.GetPosition().GetString());
+		//System.out.println("after v3: " + transformedV3.GetPosition().GetString());
 		
 		FillTriangleOnScreen(transformedV1, transformedV2, transformedV3);
 	}
