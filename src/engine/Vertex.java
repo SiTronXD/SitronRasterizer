@@ -10,7 +10,7 @@ public class Vertex {
 		m_color = color;
 	}
 	
-	public Vertex Lerp(Vertex v1, Vertex v2, float t)
+	public static Vertex Lerp(Vertex v1, Vertex v2, float t)
 	{
 		return new Vertex(
 				Vector.Lerp(v1.GetPosition(), v2.GetPosition(), t),

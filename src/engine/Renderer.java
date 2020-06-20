@@ -19,7 +19,13 @@ public class Renderer {
 	
 	public void FillTriangle(Vertex v1, Vertex v2, Vertex v3)
 	{
-		SortVertices(v1, v2, v3);
+		Vertex[] sortedVertices = SortVertices(v1, v2, v3);
+		v1 = sortedVertices[0];
+		v2 = sortedVertices[1];
+		v3 = sortedVertices[2];
+
+		Vertex[] xMinVert = new Vertex[m_height];
+		Vertex[] xMaxVert = new Vertex[m_height];
 		int[] xMin = new int[m_height];
 		int[] xMax = new int[m_height];
 		int yMin = 0;
@@ -61,7 +67,12 @@ public class Renderer {
 				int curr_y = (int) firstLine.get(i).y;
 				
 				if(curr_x < xMin[curr_y])
+				{
+					float t = (float)i / (float) firstLine.size();
+					
 					xMin[curr_y] = curr_x;
+					xMinVert[curr_y] = Vertex.Lerp(v1, v2, t);
+				}
 			}
 			for(int i = 0; i < thirdLine.size(); i++)
 			{
@@ -69,7 +80,12 @@ public class Renderer {
 				int curr_y = (int) thirdLine.get(i).y;
 				
 				if(curr_x < xMin[curr_y])
+				{
+					float t = (float)i / (float) thirdLine.size();
+					
 					xMin[curr_y] = curr_x;
+					xMinVert[curr_y] = Vertex.Lerp(v2, v3, t);
+				}
 			}
 			
 
@@ -80,7 +96,12 @@ public class Renderer {
 				int curr_y = (int) secondLine.get(i).y;
 				
 				if(curr_x > xMax[curr_y])
+				{
+					float t = (float) i / (float) secondLine.size();
+					
 					xMax[curr_y] = curr_x;
+					xMaxVert[curr_y] = Vertex.Lerp(v1, v3, t);
+				}
 			}
 		}
 		else
@@ -92,7 +113,12 @@ public class Renderer {
 				int curr_y = (int) secondLine.get(i).y;
 				
 				if(curr_x < xMin[curr_y])
+				{
+					float t = (float) i / (float) secondLine.size();
+					
 					xMin[curr_y] = curr_x;
+					xMinVert[curr_y] = Vertex.Lerp(v1, v3, t);
+				}
 			}
 			
 			// Set xMax
@@ -102,7 +128,12 @@ public class Renderer {
 				int curr_y = (int) firstLine.get(i).y;
 				
 				if(curr_x > xMax[curr_y])
+				{
+					float t = (float) i / (float) firstLine.size();
+					
 					xMax[curr_y] = curr_x;
+					xMaxVert[curr_y] = Vertex.Lerp(v1, v2, t);
+				}
 			}
 			for(int i = 0; i < thirdLine.size(); i++)
 			{
@@ -110,15 +141,39 @@ public class Renderer {
 				int curr_y = (int) thirdLine.get(i).y;
 				
 				if(curr_x > xMax[curr_y])
+				{
+					float t = (float) i / (float) thirdLine.size();
+					
 					xMax[curr_y] = curr_x;
+					xMaxVert[curr_y] = Vertex.Lerp(v2, v3, t);
+				}
 			}
 		}
 		
 		for(int y = yMin; y <= yMax; y++)
 		{
+			Vertex minVert = xMinVert[y];
+			Vertex maxVert = xMaxVert[y];
+			
 			for(int x = xMin[y]; x <= xMax[y]; x++)
 			{
-				renderTexture.SetPixel(x, y, 255, 0, 0, 255);
+				float t = 0.0f;
+				
+				if(xMax[y] - xMin[y] != 0)
+					t = (float)(x - xMin[y]) / (float) (xMax[y] - xMin[y]);
+				else
+					t = 1.0f;
+				
+				Vertex lerpVert = Vertex.Lerp(minVert, maxVert, t);
+				
+				renderTexture.SetPixel(
+					x, 
+					y, 
+					(int) lerpVert.GetColor().x, 
+					(int) lerpVert.GetColor().y, 
+					(int) lerpVert.GetColor().z, 
+					255
+				);
 			}
 		}
 		
@@ -241,7 +296,7 @@ public class Renderer {
 		return storedPoints;
 	}
 	
-	void SortVertices(Vertex v1, Vertex v2, Vertex v3)
+	Vertex[] SortVertices(Vertex v1, Vertex v2, Vertex v3)
 	{
 		if(v1.GetPosition().y > v2.GetPosition().y)
 		{
@@ -263,6 +318,8 @@ public class Renderer {
 			v2 = v3;
 			v3 = temp;
 		}
+		
+		return new Vertex[] { v1, v2, v3 };
 	}
 	
 	public void ClearRenderTexture(int red, int green, int blue)

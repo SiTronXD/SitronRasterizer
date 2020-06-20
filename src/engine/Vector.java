@@ -37,4 +37,14 @@ public class Vector {
 				v1.w + (v2.w - v1.w) * t
 			);
 	}
+	
+	public void Set(float x_pos, float y_pos, float z_pos, float w_pos)
+	{
+		x = x_pos;
+		y = y_pos;
+		z = z_pos;
+		w = w_pos;
+	}
+	
+	public String GetString() { return "x: " + x + "  y: " + y + "  z: " + z + "  w: " + w; }
 }
