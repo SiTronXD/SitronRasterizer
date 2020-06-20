@@ -10,6 +10,14 @@ public class Vertex {
 		m_color = color;
 	}
 	
+	public Vertex Lerp(Vertex v1, Vertex v2, float t)
+	{
+		return new Vertex(
+				Vector.Lerp(v1.GetPosition(), v2.GetPosition(), t),
+				Vector.Lerp(v1.GetColor(), v2.GetColor(), t)
+			);
+	}
+	
 	public Vector GetPosition() { return m_position; }
 	public Vector GetColor() { return m_color; }
 }
