@@ -38,6 +38,14 @@ public class Vector {
 			);
 	}
 	
+	public void Div(float xd, float yd, float zd, float wd)
+	{
+		x /= xd;
+		y /= yd;
+		z /= zd;
+		w /= wd;
+	}
+	
 	public void Set(float x_pos, float y_pos, float z_pos)
 	{
 		x = x_pos;

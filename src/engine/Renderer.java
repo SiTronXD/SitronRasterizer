@@ -9,19 +9,34 @@ public class Renderer {
 	
 	Texture renderTexture;
 	
+	Matrix m_screenSpaceTransform;
+	
 	public Renderer(int width, int height)
 	{
 		m_width = width;
 		m_height = height;
 		
 		renderTexture = new Texture(width, height);
+		
+		m_screenSpaceTransform = Matrix.Identity();
 	}
 	
 	public void DrawTriangle(Matrix transform, Vertex v1, Vertex v2, Vertex v3)
 	{
+		// Local space --> NDC space
 		Vertex transformedV1 = v1.Transform(transform);
 		Vertex transformedV2 = v2.Transform(transform);
 		Vertex transformedV3 = v3.Transform(transform);
+		
+		// NDC space --> screen space
+		transformedV1 = transformedV1.Transform(m_screenSpaceTransform);
+		transformedV2 = transformedV2.Transform(m_screenSpaceTransform);
+		transformedV3 = transformedV3.Transform(m_screenSpaceTransform);
+		
+		// Perspective divide
+		transformedV1.GetPosition().Div(transformedV1.GetPosition().w, transformedV1.GetPosition().w, transformedV1.GetPosition().w, 1.0f);
+		transformedV2.GetPosition().Div(transformedV2.GetPosition().w, transformedV1.GetPosition().w, transformedV1.GetPosition().w, 1.0f);
+		transformedV3.GetPosition().Div(transformedV3.GetPosition().w, transformedV1.GetPosition().w, transformedV1.GetPosition().w, 1.0f);
 		
 		FillTriangleOnScreen(transformedV1, transformedV2, transformedV3);
 	}
@@ -334,6 +349,11 @@ public class Renderer {
 	public void ClearRenderTexture(int red, int green, int blue)
 	{
 		renderTexture.SetToColor(red, green, blue, 255);
+	}
+	
+	public void SetScreenSpaceTransform(Matrix sst)
+	{
+		m_screenSpaceTransform = sst;
 	}
 	
 	public int GetWidth() { return m_width; }
