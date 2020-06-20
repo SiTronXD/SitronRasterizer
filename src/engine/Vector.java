@@ -8,7 +8,7 @@ public class Vector {
 		x = x_pos;
 		y = y_pos;
 		z = 0.0f;
-		w = 0.0f;
+		w = 1.0f;
 	}
 	
 	public Vector(float x_pos, float y_pos, float z_pos)
@@ -16,7 +16,7 @@ public class Vector {
 		x = x_pos;
 		y = y_pos;
 		z = z_pos;
-		w = 0.0f;
+		w = 1.0f;
 	}
 	
 	public Vector(float x_pos, float y_pos, float z_pos, float w_pos)
@@ -38,12 +38,27 @@ public class Vector {
 			);
 	}
 	
+	public void Set(float x_pos, float y_pos, float z_pos)
+	{
+		x = x_pos;
+		y = y_pos;
+		z = z_pos;
+	}
+	
 	public void Set(float x_pos, float y_pos, float z_pos, float w_pos)
 	{
 		x = x_pos;
 		y = y_pos;
 		z = z_pos;
 		w = w_pos;
+	}
+	
+	public void Set(Vector v)
+	{
+		x = v.x;
+		y = v.y;
+		z = v.z;
+		w = v.w;
 	}
 	
 	public String GetString() { return "x: " + x + "  y: " + y + "  z: " + z + "  w: " + w; }

@@ -17,7 +17,16 @@ public class Renderer {
 		renderTexture = new Texture(width, height);
 	}
 	
-	public void FillTriangle(Vertex v1, Vertex v2, Vertex v3)
+	public void DrawTriangle(Matrix transform, Vertex v1, Vertex v2, Vertex v3)
+	{
+		Vertex transformedV1 = v1.Transform(transform);
+		Vertex transformedV2 = v2.Transform(transform);
+		Vertex transformedV3 = v3.Transform(transform);
+		
+		FillTriangleOnScreen(transformedV1, transformedV2, transformedV3);
+	}
+	
+	public void FillTriangleOnScreen(Vertex v1, Vertex v2, Vertex v3)
 	{
 		Vertex[] sortedVertices = SortVertices(v1, v2, v3);
 		v1 = sortedVertices[0];

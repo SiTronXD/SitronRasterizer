@@ -10,6 +10,16 @@ public class Vertex {
 		m_color = color;
 	}
 	
+	public Vertex Transform(Matrix transform)
+	{
+		Vector newPos = Matrix.MatVecMul(transform, m_position);
+		
+		return new Vertex(
+			newPos,
+			m_color
+		);
+	}
+	
 	public static Vertex Lerp(Vertex v1, Vertex v2, float t)
 	{
 		return new Vertex(
