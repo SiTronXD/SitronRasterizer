@@ -20,6 +20,21 @@ public class Vertex {
 		);
 	}
 	
+	public Vertex TransformToScreenSpace(float width, float height)
+	{
+		Vector newPos = new Vector(
+			(m_position.x * 0.5f + 0.5f) * width,
+			(m_position.y * 0.5f + 0.5f) * height,
+			m_position.z,
+			m_position.w
+		);
+		
+		return new Vertex(
+			newPos,
+			m_color
+		);
+	}
+	
 	public static Vertex Lerp(Vertex v1, Vertex v2, float t)
 	{
 		return new Vertex(

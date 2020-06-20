@@ -47,6 +47,7 @@ public class Matrix {
 		return pm;
 	}
 	
+	// Matrix to transform NDC coordinates to Screen space coordinates (requires w-component to be 1)
 	public static Matrix ScreenSpace(float screenWidth, float screenHeight)
 	{
 		Matrix ssm = new Matrix();
