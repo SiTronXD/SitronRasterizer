@@ -20,6 +20,51 @@ public class Matrix {
 		return ssm;
 	}
 	
+	public static Matrix RotateX(float radiansAngle)
+	{
+		Matrix rotMat = new Matrix();
+		
+		float c = (float) Math.cos(radiansAngle);
+		float s = (float) Math.sin(radiansAngle);
+		
+		rotMat.m[0][0] = 1.0f;		rotMat.m[0][1] = 0.0f;		rotMat.m[0][2] = 0.0f;		rotMat.m[0][3] = 0.0f;
+		rotMat.m[1][0] = 0.0f;		rotMat.m[1][1] = c;			rotMat.m[1][2] = -s;		rotMat.m[1][3] = 0.0f;
+		rotMat.m[2][0] = 0.0f;		rotMat.m[2][1] = s;			rotMat.m[2][2] = c;			rotMat.m[2][3] = 0.0f;
+		rotMat.m[3][0] = 0.0f;		rotMat.m[3][1] = 0.0f;		rotMat.m[3][2] = 0.0f;		rotMat.m[3][3] = 1.0f;
+		
+		return rotMat;
+	}
+	
+	public static Matrix RotateY(float radiansAngle)
+	{
+		Matrix rotMat = new Matrix();
+		
+		float c = (float) Math.cos(radiansAngle);
+		float s = (float) Math.sin(radiansAngle);
+		
+		rotMat.m[0][0] = c;			rotMat.m[0][1] = 0.0f;		rotMat.m[0][2] = s;			rotMat.m[0][3] = 0.0f;
+		rotMat.m[1][0] = 0.0f;		rotMat.m[1][1] = 1.0f;		rotMat.m[1][2] = 0.0f;		rotMat.m[1][3] = 0.0f;
+		rotMat.m[2][0] = -s;		rotMat.m[2][1] = 0.0f;		rotMat.m[2][2] = c;			rotMat.m[2][3] = 0.0f;
+		rotMat.m[3][0] = 0.0f;		rotMat.m[3][1] = 0.0f;		rotMat.m[3][2] = 0.0f;		rotMat.m[3][3] = 1.0f;
+		
+		return rotMat;
+	}
+	
+	public static Matrix RotateZ(float radiansAngle)
+	{
+		Matrix rotMat = new Matrix();
+		
+		float c = (float) Math.cos(radiansAngle);
+		float s = (float) Math.sin(radiansAngle);
+		
+		rotMat.m[0][0] = c;			rotMat.m[0][1] = -s;		rotMat.m[0][2] = 0.0f;		rotMat.m[0][3] = 0.0f;
+		rotMat.m[1][0] = s;			rotMat.m[1][1] = c;			rotMat.m[1][2] = 0.0f;		rotMat.m[1][3] = 0.0f;
+		rotMat.m[2][0] = 0.0f;		rotMat.m[2][1] = 0.0f;		rotMat.m[2][2] = 1.0f;		rotMat.m[2][3] = 0.0f;
+		rotMat.m[3][0] = 0.0f;		rotMat.m[3][1] = 0.0f;		rotMat.m[3][2] = 0.0f;		rotMat.m[3][3] = 1.0f;
+		
+		return rotMat;
+	}
+	
 	public static Matrix Translate(float x, float y, float z)
 	{
 		Matrix tm = new Matrix();
@@ -36,7 +81,7 @@ public class Matrix {
 	{
 		Matrix pm = new Matrix();
 		
-		float tanHalfFov = (float) Math.tan(Math.toRadians(fov) / 2.0f);
+		float tanHalfFov = (float) Math.tan(fov / 2.0f);
 		float FMinusN = far - near;
 		
 		pm.m[0][0] = 1.0f / (aspectRatio * tanHalfFov);		pm.m[0][1] = 0.0f;					pm.m[0][2] = 0.0f;						pm.m[0][3] = 0.0f;

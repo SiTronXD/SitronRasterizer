@@ -9,16 +9,12 @@ public class Renderer {
 	
 	Texture renderTexture;
 	
-	Matrix m_screenSpaceTransform;
-	
 	public Renderer(int width, int height)
 	{
 		m_width = width;
 		m_height = height;
 		
 		renderTexture = new Texture(width, height);
-		
-		m_screenSpaceTransform = Matrix.Identity();
 	}
 	
 	public void DrawTriangle(Matrix transform, Vertex v1, Vertex v2, Vertex v3)
@@ -49,13 +45,83 @@ public class Renderer {
 		FillTriangleOnScreen(transformedV1, transformedV2, transformedV3);
 	}
 	
-	public void FillTriangleOnScreen(Vertex v1, Vertex v2, Vertex v3)
+	public void DrawTriangleWireframe(Matrix transform, Vertex v1, Vertex v2, Vertex v3)
 	{
+		// Local space --> NDC space
+		Vertex transformedV1 = v1.Transform(transform);
+		Vertex transformedV2 = v2.Transform(transform);
+		Vertex transformedV3 = v3.Transform(transform);
+		
+		// Perspective divide
+		transformedV1.GetPosition().Div(transformedV1.GetPosition().w, transformedV1.GetPosition().w, transformedV1.GetPosition().w, 1.0f);
+		transformedV2.GetPosition().Div(transformedV2.GetPosition().w, transformedV2.GetPosition().w, transformedV2.GetPosition().w, 1.0f);
+		transformedV3.GetPosition().Div(transformedV3.GetPosition().w, transformedV3.GetPosition().w, transformedV3.GetPosition().w, 1.0f);
+		
+		// NDC space --> screen space
+		transformedV1 = transformedV1.TransformToScreenSpace(m_width, m_height);
+		transformedV2 = transformedV2.TransformToScreenSpace(m_width, m_height);
+		transformedV3 = transformedV3.TransformToScreenSpace(m_width, m_height);
+		
+		DrawNonFilledTriangleOnScreen(transformedV1, transformedV2, transformedV3);
+	}
+	
+	public void DrawNonFilledTriangleOnScreen(Vertex v1, Vertex v2, Vertex v3)
+	{
+		// Sort vertices
 		Vertex[] sortedVertices = SortVertices(v1, v2, v3);
 		v1 = sortedVertices[0];
 		v2 = sortedVertices[1];
 		v3 = sortedVertices[2];
 
+		// Find lines and add the points to arraylists
+		ArrayList<Vector> firstLine = DrawLine(
+			(int) v1.GetPosition().x, 
+			(int) v1.GetPosition().y, 
+			(int) v2.GetPosition().x, 
+			(int) v2.GetPosition().y
+		);
+		ArrayList<Vector> secondLine = DrawLine(
+			(int) v1.GetPosition().x,
+			(int) v1.GetPosition().y,
+			(int) v3.GetPosition().x,
+			(int) v3.GetPosition().y
+		);
+		ArrayList<Vector> thirdLine = DrawLine(
+			(int) v2.GetPosition().x,
+			(int) v2.GetPosition().y,
+			(int) v3.GetPosition().x,
+			(int) v3.GetPosition().y
+		);
+		
+		// Add all line points in one single arraylist
+		ArrayList<Vector> allLinePoints = new ArrayList<Vector>();
+		allLinePoints.addAll(firstLine);
+		allLinePoints.addAll(secondLine);
+		allLinePoints.addAll(thirdLine);
+		
+		// Draw the points
+		for(int i = 0; i < allLinePoints.size(); i++)
+		{
+			renderTexture.SetPixel(
+				(int) allLinePoints.get(i).x, 
+				(int) allLinePoints.get(i).y, 
+				255, 
+				255, 
+				255, 
+				255
+			);
+		}
+	}
+	
+	public void FillTriangleOnScreen(Vertex v1, Vertex v2, Vertex v3)
+	{
+		// Sort vertices
+		Vertex[] sortedVertices = SortVertices(v1, v2, v3);
+		v1 = sortedVertices[0];
+		v2 = sortedVertices[1];
+		v3 = sortedVertices[2];
+
+		// Setup min and max boundaries for the horizontal lines in the triangle
 		Vertex[] xMinVert = new Vertex[m_height];
 		Vertex[] xMaxVert = new Vertex[m_height];
 		int[] xMin = new int[m_height];
@@ -63,12 +129,13 @@ public class Renderer {
 		int yMin = 0;
 		int yMax = 0;
 		
-		// Set extreme boundaries for min and max
+		// Set extreme initial boundaries for min and max
 		for(int i = 0; i < xMin.length; i++)
 			xMin[i] = m_width+1;
 		for(int i = 0; i < xMax.length; i++)
 			xMax[i] = -1;
 		
+		// Find lines and add the points to arraylists
 		ArrayList<Vector> firstLine = DrawLine(
 			(int) v1.GetPosition().x, 
 			(int) v1.GetPosition().y, 
@@ -182,22 +249,27 @@ public class Renderer {
 			}
 		}
 		
+		// Go from top to bottom in the triangle
 		for(int y = yMin; y <= yMax; y++)
 		{
 			Vertex minVert = xMinVert[y];
 			Vertex maxVert = xMaxVert[y];
 			
+			// Go through each pixel in the horizontal line
 			for(int x = xMin[y]; x <= xMax[y]; x++)
 			{
 				float t = 0.0f;
 				
+				// Make sure there is more than 1 pixel in the line
 				if(xMax[y] - xMin[y] != 0)
 					t = (float)(x - xMin[y]) / (float) (xMax[y] - xMin[y]);
 				else
 					t = 1.0f;
 				
+				// Interpolate across the line
 				Vertex lerpVert = Vertex.Lerp(minVert, maxVert, t);
 				
+				// Render!
 				renderTexture.SetPixel(
 					x, 
 					y, 
@@ -208,37 +280,6 @@ public class Renderer {
 				);
 			}
 		}
-		
-		
-		/*
-		for(int i = 0; i < firstLine.size(); i++)
-			renderTexture.SetPixel(
-					(int) firstLine.get(i).x, 
-					(int) firstLine.get(i).y, 
-					(int)(255*((float)i / (float)firstLine.size())), 
-					0, 
-					0, 
-					255
-				);
-		for(int i = 0; i < secondLine.size(); i++)
-			renderTexture.SetPixel(
-					(int) secondLine.get(i).x, 
-					(int) secondLine.get(i).y, 
-					0, 
-					(int)(255*((float)i / (float)secondLine.size())), 
-					0, 
-					255
-				);
-		for(int i = 0; i < thirdLine.size(); i++)
-			renderTexture.SetPixel(
-					(int) thirdLine.get(i).x, 
-					(int) thirdLine.get(i).y, 
-					0, 
-					0, 
-					(int)(255*((float)i / (float)thirdLine.size())), 
-					255
-				);
-				*/
 	}
 	
 	// Bresenham's line algorithm
@@ -328,8 +369,10 @@ public class Renderer {
 		return storedPoints;
 	}
 	
+	// Brute force sort through the 3 vertices
 	Vertex[] SortVertices(Vertex v1, Vertex v2, Vertex v3)
 	{
+		// Sort based on y-position
 		if(v1.GetPosition().y > v2.GetPosition().y)
 		{
 			Vertex temp = v1;
@@ -351,17 +394,20 @@ public class Renderer {
 			v3 = temp;
 		}
 		
+		// v1.y == v2.y and v1.x > v2.x, then switch so the minX and maxX can be correctly calculated
+		if((int) v1.GetPosition().y == (int) v2.GetPosition().y && v1.GetPosition().x > v2.GetPosition().x)
+		{
+			Vertex temp = v1;
+			v1 = v2;
+			v2 = temp;
+		}
+		
 		return new Vertex[] { v1, v2, v3 };
 	}
 	
 	public void ClearRenderTexture(int red, int green, int blue)
 	{
 		renderTexture.SetToColor(red, green, blue, 255);
-	}
-	
-	public void SetScreenSpaceTransform(Matrix sst)
-	{
-		m_screenSpaceTransform = sst;
 	}
 	
 	public int GetWidth() { return m_width; }
