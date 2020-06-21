@@ -30,9 +30,23 @@ public class Main {
 		
 		
 		// Main loop
+		double lastTime = System.nanoTime();
 		boolean running = true;
 		while(running) // JFrame is running on a different thread
 		{
+			double timeNow = System.nanoTime();
+			double deltaTime = timeNow - lastTime;
+			lastTime = System.nanoTime();
+			
+			double timeInMilliseconds = deltaTime / 1000000.0;
+			double fps = 1000000000.0 / deltaTime; // 1 / (deltaTime / 1000000000.0)
+			
+			timeInMilliseconds = (double) Math.round(timeInMilliseconds * 100.0) / 100.0;
+			fps = (double) Math.round(fps);
+			
+			System.out.println("ms: " + timeInMilliseconds + "  (fps: " + fps + ")");
+			
+			
 			renderer.ClearRenderTexture(50, 50, 50);
 			
 			timer += 0.003f;

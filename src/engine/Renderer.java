@@ -19,7 +19,7 @@ public class Renderer {
 	
 	public void DrawTriangle(Matrix transform, Vertex v1, Vertex v2, Vertex v3)
 	{
-		// Local space --> NDC space
+		// Local space --> Clip space
 		Vertex transformedV1 = v1.Transform(transform);
 		Vertex transformedV2 = v2.Transform(transform);
 		Vertex transformedV3 = v3.Transform(transform);
