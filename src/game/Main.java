@@ -9,6 +9,9 @@ import java.awt.image.DataBufferByte;
 
 import javax.swing.JFrame;
 
+import com.sun.glass.events.KeyEvent;
+
+import engine.Input;
 import engine.Matrix;
 import engine.Renderer;
 import engine.Texture;
@@ -25,10 +28,13 @@ public class Main {
 	boolean running;
 	
 	Window window;
+	Input input;
 	Renderer renderer;
 	
 	Matrix perspectiveTransform;
 	Matrix transform;
+	
+	Camera camera;
 	
 	Vertex v1;
 	Vertex v2;
@@ -37,7 +43,10 @@ public class Main {
 	public void Init() 
 	{
 		window = new Window(screenWidth, screenHeight, "Sitron Rasterizer!!!");
+		input = new Input();
 		renderer = new Renderer(screenWidth, screenHeight);
+		
+		window.SetKeyListener(input);
 		
 		perspectiveTransform = Matrix.Perspective(
 			(float)screenWidth / (float)screenHeight, 
@@ -50,6 +59,7 @@ public class Main {
 		v2 = new Vertex(new Vector(-0.5f, -0.5f, 0.0f), new Vector(0, 255, 0));
 		v3 = new Vertex(new Vector( 0.5f, -0.5f, 0.0f), new Vector(0, 0, 255));
 		
+		camera = new Camera();
 		
 		// Main loop
 		double lastTime = System.nanoTime();
@@ -69,20 +79,59 @@ public class Main {
 			System.out.println("ms: " + timeInMilliseconds + "  (fps: " + fps + ")");
 			
 			
-			// Eclipse's hot code replace doesn't work if the code is in this while loop :/
-			Update();
+			// Eclipse's hot code replace doesn't work if the code is in this while loop.
+			// This might be since Eclipse tries to replace the whole function while the function is not active
+			Update((float) deltaTime);
 			Render();
+			input.UpdatePreviousKeys();
 		}
+		
+		System.out.println("exit");
 	}
 	
-	void Update()
+	void Update(float dt)
 	{
-		timer += 0.003f;
+		//if(input.GetKeyDown(KeyEvent.VK_ESCAPE))
+		//	running = false;
+		
+		float rotSpeed = 1.7f;
+		float movementSpeed = 3.5f;
+		
+		float r = 0;
+		float u = 0;
+		float f = 0;
+		if(input.GetKeyDown(KeyEvent.VK_A))
+			r += movementSpeed * dt;
+		if(input.GetKeyDown(KeyEvent.VK_D))
+			r -= movementSpeed * dt;
+		if(input.GetKeyDown(KeyEvent.VK_W))
+			f += movementSpeed * dt;
+		if(input.GetKeyDown(KeyEvent.VK_S))
+			f -= movementSpeed * dt;
+		if(input.GetKeyDown(KeyEvent.VK_Q))
+			u -= movementSpeed * dt;
+		if(input.GetKeyDown(KeyEvent.VK_E))
+			u += movementSpeed * dt;
+		
+		float h = 0;
+		float v = 0;
+		if(input.GetKeyDown(KeyEvent.VK_RIGHT))
+			h += rotSpeed * dt;
+		if(input.GetKeyDown(KeyEvent.VK_LEFT))
+			h -= rotSpeed * dt;
+		if(input.GetKeyDown(KeyEvent.VK_UP))
+			v += rotSpeed * dt;
+		if(input.GetKeyDown(KeyEvent.VK_DOWN))
+			v -= rotSpeed * dt;
+
+		camera.Rotate(h, v);
+		camera.Move(r, u, f);
 		
 		transform = Matrix.Identity();
 		transform = Matrix.MatMatMul(Matrix.Translate(0.0f, 0.0f, 1.0f), transform);
 		transform = Matrix.MatMatMul(Matrix.RotateY(timer), transform);
 		transform = Matrix.MatMatMul(Matrix.Translate(0.0f, 0.0f, 2.0f), transform);
+		transform = Matrix.MatMatMul(camera.GetViewMat(), transform);
 		transform = Matrix.MatMatMul(perspectiveTransform, transform);
 		
 		// Rot Y from above

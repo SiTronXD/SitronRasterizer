@@ -3,6 +3,7 @@ package engine;
 import java.awt.Canvas;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.event.KeyListener;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
@@ -37,6 +38,9 @@ public class Window extends Canvas
 		jframe.setTitle(title);
 		jframe.setVisible(true);
 		
+		// Request focus so the KeyListener will work when the window pops up
+		requestFocus();
+		
 		// Create strategy for buffering
 		createBufferStrategy(1);
 		m_bufferStrategy = getBufferStrategy();
@@ -64,5 +68,10 @@ public class Window extends Canvas
 		
 		// Show and switch buffer
 		m_bufferStrategy.show(); 
+	}
+	
+	public void SetKeyListener(KeyListener kl)
+	{
+		addKeyListener(kl);
 	}
 }

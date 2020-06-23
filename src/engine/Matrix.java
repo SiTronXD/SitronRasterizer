@@ -77,6 +77,25 @@ public class Matrix {
 		return tm;
 	}
 	
+	public static Matrix View(Vector position, Vector forward, Vector worldUp)
+	{
+		Vector right = Vector.Cross(forward, worldUp);
+		Vector newUp = Vector.Cross(right, forward);
+		
+		// Rotation
+		Matrix rotMat = new Matrix();		
+		rotMat.m[0][0] = right.x;		rotMat.m[0][1] = right.y;		rotMat.m[0][2] = right.z;		rotMat.m[0][3] = 0.0f;
+		rotMat.m[1][0] = newUp.x;		rotMat.m[1][1] = newUp.y;		rotMat.m[1][2] = newUp.z;		rotMat.m[1][3] = 0.0f;
+		rotMat.m[2][0] = forward.x;		rotMat.m[2][1] = forward.y;		rotMat.m[2][2] = forward.z;		rotMat.m[2][3] = 0.0f;
+		rotMat.m[3][0] = 0.0f;			rotMat.m[3][1] = 0.0f;			rotMat.m[3][2] = 0.0f;			rotMat.m[3][3] = 1.0f;
+		
+		// Translation
+		Matrix translationMat = Translate(-position.x, -position.y, -position.z);
+		
+		// Final view matrix
+		return MatMatMul(rotMat, translationMat);
+	}
+	
 	public static Matrix Perspective(float aspectRatio, float fov, float near, float far)
 	{
 		Matrix pm = new Matrix();
@@ -135,5 +154,13 @@ public class Matrix {
 		);
 		
 		return newVec;
+	}
+	
+	public String GetString()
+	{
+		return 	"m[0][0]: " + m[0][0] + "  m[0][1]: " + m[0][1] + "  m[0][2]: " + m[0][2] + "  m[0][3]: " + m[0][3] + " \n" + 
+				"m[1][0]: " + m[1][0] + "  m[1][1]: " + m[1][1] + "  m[1][2]: " + m[1][2] + "  m[1][3]: " + m[1][3] + " \n" +
+				"m[2][0]: " + m[2][0] + "  m[2][1]: " + m[2][1] + "  m[2][2]: " + m[2][2] + "  m[2][3]: " + m[2][3] + " \n" +
+				"m[3][0]: " + m[3][0] + "  m[3][1]: " + m[3][1] + "  m[3][2]: " + m[3][2] + "  m[3][3]: " + m[3][3] + " \n";
 	}
 }
