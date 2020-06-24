@@ -36,6 +36,8 @@ public class Main {
 	
 	Camera camera;
 	
+	Texture testTexture;
+	
 	Vertex v1;
 	Vertex v2;
 	Vertex v3;
@@ -55,11 +57,14 @@ public class Main {
 			100.0f
 		);
 		
-		v1 = new Vertex(new Vector( 0.0f,  0.5f, 0.0f), new Vector(255, 0, 0));
-		v2 = new Vertex(new Vector(-0.5f, -0.5f, 0.0f), new Vector(0, 255, 0));
-		v3 = new Vertex(new Vector( 0.5f, -0.5f, 0.0f), new Vector(0, 0, 255));
+		v1 = new Vertex(new Vector( 0.0f,  0.5f, 0.0f), new Vector(255, 0, 0), new Vector(0.5f, 0.0f));
+		v2 = new Vertex(new Vector( 0.5f, -0.5f, 0.0f), new Vector(0, 255, 0), new Vector(0.0f, 1.0f));
+		v3 = new Vertex(new Vector(-0.5f, -0.5f, 0.0f), new Vector(0, 0, 255), new Vector(1.0f, 1.0f));
 		
 		camera = new Camera();
+		
+		testTexture = new Texture("./res/gfx/howBoutYallFellas.png");
+		//testTexture = new Texture("./res/gfx/CEOOfDrunk.png");
 		
 		// Main loop
 		double lastTime = System.nanoTime();
@@ -87,12 +92,14 @@ public class Main {
 		}
 		
 		System.out.println("exit");
+		System.exit(0);
 	}
 	
 	void Update(float dt)
 	{
-		//if(input.GetKeyDown(KeyEvent.VK_ESCAPE))
-		//	running = false;
+		// Exit
+		if(input.GetKeyDown(KeyEvent.VK_ESCAPE))
+			running = false;
 		
 		float rotSpeed = 1.7f;
 		float movementSpeed = 3.5f;
@@ -149,7 +156,8 @@ public class Main {
 	{
 		renderer.ClearRenderTexture(50, 50, 50);
 		
-		renderer.DrawTriangle(transform, v1, v2, v3);
+		renderer.DrawTriangle(transform, v1, v2, v3, testTexture);
+		//renderer.DrawTriangleWireframe(transform, v1, v2, v3);
 
 		window.ShowBuffer(renderer.GetRenderTexture());
 	}

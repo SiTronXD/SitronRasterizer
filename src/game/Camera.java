@@ -45,10 +45,18 @@ public class Camera {
 		yaw -= h;
 		pitch += v;
 		
+		/*
 		forward = new Vector(
 			(float) (Math.cos(pitch) * Math.sin(yaw)),
 			(float) (Math.sin(pitch) * Math.cos(yaw)),
 			(float) (Math.cos(yaw))
+		);
+		*/
+		
+		forward = new Vector(
+			(float) (Math.sin(yaw) * Math.cos(pitch)),
+			(float) (Math.sin(pitch)),
+			(float) (Math.cos(yaw) * Math.cos(pitch))
 		);
 	}
 	

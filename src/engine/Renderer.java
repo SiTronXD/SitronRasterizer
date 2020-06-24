@@ -17,32 +17,30 @@ public class Renderer {
 		renderTexture = new Texture(width, height);
 	}
 	
-	public void DrawTriangle(Matrix transform, Vertex v1, Vertex v2, Vertex v3)
+	public void DrawTriangle(Matrix transform, Vertex v1, Vertex v2, Vertex v3, Texture texture)
 	{
 		// Local space --> Clip space
 		Vertex transformedV1 = v1.Transform(transform);
 		Vertex transformedV2 = v2.Transform(transform);
 		Vertex transformedV3 = v3.Transform(transform);
 		
+		// Temporary solution for frustum culling
+		if(!(Vertex.IsInsideViewFrustum(transformedV1.GetPosition()) && 
+			 Vertex.IsInsideViewFrustum(transformedV2.GetPosition()) && 
+			 Vertex.IsInsideViewFrustum(transformedV3.GetPosition())))
+			return;
+		
 		// Perspective divide
 		transformedV1.GetPosition().Div(transformedV1.GetPosition().w, transformedV1.GetPosition().w, transformedV1.GetPosition().w, 1.0f);
 		transformedV2.GetPosition().Div(transformedV2.GetPosition().w, transformedV2.GetPosition().w, transformedV2.GetPosition().w, 1.0f);
 		transformedV3.GetPosition().Div(transformedV3.GetPosition().w, transformedV3.GetPosition().w, transformedV3.GetPosition().w, 1.0f);
-		
-		//System.out.println("v1: " + transformedV1.GetPosition().GetString());
-		//System.out.println("v2: " + transformedV2.GetPosition().GetString());
-		//System.out.println("v3: " + transformedV3.GetPosition().GetString());
 		
 		// NDC space --> screen space
 		transformedV1 = transformedV1.TransformToScreenSpace(m_width, m_height);
 		transformedV2 = transformedV2.TransformToScreenSpace(m_width, m_height);
 		transformedV3 = transformedV3.TransformToScreenSpace(m_width, m_height);
 		
-		//System.out.println("after v1: " + transformedV1.GetPosition().GetString());
-		//System.out.println("after v2: " + transformedV2.GetPosition().GetString());
-		//System.out.println("after v3: " + transformedV3.GetPosition().GetString());
-		
-		FillTriangleOnScreen(transformedV1, transformedV2, transformedV3);
+		FillTriangleOnScreen(transformedV1, transformedV2, transformedV3, texture);
 	}
 	
 	public void DrawTriangleWireframe(Matrix transform, Vertex v1, Vertex v2, Vertex v3)
@@ -51,6 +49,12 @@ public class Renderer {
 		Vertex transformedV1 = v1.Transform(transform);
 		Vertex transformedV2 = v2.Transform(transform);
 		Vertex transformedV3 = v3.Transform(transform);
+		
+		// Temporary solution for frustum culling
+		if(!(Vertex.IsInsideViewFrustum(transformedV1.GetPosition()) && 
+			 Vertex.IsInsideViewFrustum(transformedV2.GetPosition()) && 
+			 Vertex.IsInsideViewFrustum(transformedV3.GetPosition())))
+			return;
 		
 		// Perspective divide
 		transformedV1.GetPosition().Div(transformedV1.GetPosition().w, transformedV1.GetPosition().w, transformedV1.GetPosition().w, 1.0f);
@@ -113,7 +117,7 @@ public class Renderer {
 		}
 	}
 	
-	public void FillTriangleOnScreen(Vertex v1, Vertex v2, Vertex v3)
+	public void FillTriangleOnScreen(Vertex v1, Vertex v2, Vertex v3, Texture texture)
 	{
 		// Sort vertices
 		Vertex[] sortedVertices = SortVertices(v1, v2, v3);
@@ -269,13 +273,15 @@ public class Renderer {
 				// Interpolate across the line
 				Vertex lerpVert = Vertex.Lerp(minVert, maxVert, t);
 				
+				Vector textureColor = texture.SampleColor(lerpVert.GetTexCoord().x, lerpVert.GetTexCoord().y);
+				
 				// Render!
 				renderTexture.SetPixel(
 					x, 
 					y, 
-					(int) lerpVert.GetColor().x, 
-					(int) lerpVert.GetColor().y, 
-					(int) lerpVert.GetColor().z, 
+					(int) (textureColor.x), 
+					(int) (textureColor.y), 
+					(int) (textureColor.z), 
 					255
 				);
 			}
