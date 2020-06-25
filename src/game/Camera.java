@@ -42,7 +42,7 @@ public class Camera {
 	
 	public void Rotate(float h, float v)
 	{
-		yaw -= h;
+		yaw += h;
 		pitch += v;
 		
 		/*

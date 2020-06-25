@@ -1,18 +1,10 @@
 package game;
 
-import java.awt.Canvas;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.image.BufferStrategy;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
-
-import javax.swing.JFrame;
-
 import com.sun.glass.events.KeyEvent;
 
 import engine.Input;
 import engine.Matrix;
+import engine.Mesh;
 import engine.Renderer;
 import engine.Texture;
 import engine.Vector;
@@ -41,6 +33,12 @@ public class Main {
 	Vertex v1;
 	Vertex v2;
 	Vertex v3;
+	Mesh testTriangleMesh;
+	
+	double lastTime;
+	double timeInMilliseconds;
+	double deltaTime;
+	double fps;
 	
 	public void Init() 
 	{
@@ -58,8 +56,9 @@ public class Main {
 		);
 		
 		v1 = new Vertex(new Vector( 0.0f,  0.5f, 0.0f), new Vector(255, 0, 0), new Vector(0.5f, 0.0f));
-		v2 = new Vertex(new Vector( 0.5f, -0.5f, 0.0f), new Vector(0, 255, 0), new Vector(0.0f, 1.0f));
-		v3 = new Vertex(new Vector(-0.5f, -0.5f, 0.0f), new Vector(0, 0, 255), new Vector(1.0f, 1.0f));
+		v2 = new Vertex(new Vector(-0.5f, -0.5f, 0.0f), new Vector(0, 255, 0), new Vector(0.0f, 1.0f));
+		v3 = new Vertex(new Vector( 0.5f, -0.5f, 0.0f), new Vector(0, 0, 255), new Vector(1.0f, 1.0f));
+		testTriangleMesh = new Mesh(new Vertex[]{ v1, v2, v3 }, new int[]{ 0, 1, 2 });
 		
 		camera = new Camera();
 		
@@ -67,22 +66,13 @@ public class Main {
 		//testTexture = new Texture("./res/gfx/CEOOfDrunk.png");
 		
 		// Main loop
-		double lastTime = System.nanoTime();
+		lastTime = System.nanoTime();
 		running = true;
 		while(running) // JFrame is running on a different thread
 		{
-			double timeNow = System.nanoTime();
-			double deltaTime = (timeNow - lastTime) / 1000000000.0;
-			lastTime = System.nanoTime();
-			
-			double timeInMilliseconds = deltaTime * 1000.0;
-			double fps = 1.0 / deltaTime; // 	1 / (deltaTime / 1000000000.0)
-			
-			timeInMilliseconds = (double) Math.round(timeInMilliseconds * 100.0) / 100.0;
-			fps = (double) Math.round(fps);
-			
+			// Update and print stats
+			UpdateTimeStats();
 			System.out.println("ms: " + timeInMilliseconds + "  (fps: " + fps + ")");
-			
 			
 			// Eclipse's hot code replace doesn't work if the code is in this while loop.
 			// This might be since Eclipse tries to replace the whole function while the function is not active
@@ -91,7 +81,7 @@ public class Main {
 			input.UpdatePreviousKeys();
 		}
 		
-		System.out.println("exit");
+		// Exit
 		System.exit(0);
 	}
 	
@@ -107,9 +97,9 @@ public class Main {
 		float r = 0;
 		float u = 0;
 		float f = 0;
-		if(input.GetKeyDown(KeyEvent.VK_A))
-			r += movementSpeed * dt;
 		if(input.GetKeyDown(KeyEvent.VK_D))
+			r += movementSpeed * dt;
+		if(input.GetKeyDown(KeyEvent.VK_A))
 			r -= movementSpeed * dt;
 		if(input.GetKeyDown(KeyEvent.VK_W))
 			f += movementSpeed * dt;
@@ -156,10 +146,22 @@ public class Main {
 	{
 		renderer.ClearRenderTexture(50, 50, 50);
 		
-		renderer.DrawTriangle(transform, v1, v2, v3, testTexture);
-		//renderer.DrawTriangleWireframe(transform, v1, v2, v3);
-
+		testTriangleMesh.Draw(renderer, transform, testTexture);
+		
 		window.ShowBuffer(renderer.GetRenderTexture());
+	}
+	
+	void UpdateTimeStats()
+	{
+		double timeNow = System.nanoTime();
+		deltaTime = (timeNow - lastTime) / 1000000000.0;
+		lastTime = System.nanoTime();
+		
+		timeInMilliseconds = deltaTime * 1000.0;
+		fps = 1.0 / deltaTime; // 	1 / (deltaTime / 1000000000.0)
+		
+		timeInMilliseconds = (double) Math.round(timeInMilliseconds * 100.0) / 100.0;
+		fps = (double) Math.round(fps);
 	}
 	
 	public static void main(String[] args) {  Main m = new Main(); m.Init(); }

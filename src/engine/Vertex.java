@@ -27,7 +27,7 @@ public class Vertex {
 	{
 		Vector newPos = new Vector(
 			(m_position.x * 0.5f + 0.5f) * width,
-			(m_position.y * 0.5f + 0.5f) * height,
+			(-m_position.y * 0.5f + 0.5f) * height, // Invert Y
 			m_position.z,
 			m_position.w
 		);
