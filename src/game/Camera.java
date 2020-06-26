@@ -1,6 +1,7 @@
 package game;
 
 import engine.Matrix;
+import engine.SMath;
 import engine.Vector;
 
 public class Camera {
@@ -44,6 +45,8 @@ public class Camera {
 	{
 		yaw += h;
 		pitch += v;
+		
+		pitch = SMath.Clamp(pitch, (float)(-Math.PI/2.0*0.7), (float)(Math.PI/2.0*0.7));
 		
 		/*
 		forward = new Vector(

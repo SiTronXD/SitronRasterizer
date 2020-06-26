@@ -5,6 +5,7 @@ import com.sun.glass.events.KeyEvent;
 import engine.Input;
 import engine.Matrix;
 import engine.Mesh;
+import engine.OBJLoader;
 import engine.Renderer;
 import engine.Texture;
 import engine.Vector;
@@ -35,6 +36,7 @@ public class Main {
 	Vertex v3;
 	Vertex v4;
 	Mesh testTriangleMesh;
+	Mesh objModelMesh;
 	
 	double lastTime;
 	double timeInMilliseconds;
@@ -66,6 +68,9 @@ public class Main {
 		v4 = new Vertex(new Vector( 0.5f,  0.5f, 0.0f), new Vector(255, 255, 0), new Vector(1.0f, 0.0f));
 		testTriangleMesh = new Mesh(new Vertex[]{ v1, v2, v3, v4 }, new int[]{ 0, 1, 2, 0, 2, 3 });
 		
+		//OBJLoader objLoader = new OBJLoader("./res/gfx/monkey2.obj");
+		OBJLoader objLoader = new OBJLoader("./res/gfx/sphere.obj");
+		objModelMesh = new Mesh(objLoader);
 		
 		/*
 		v1 = new Vertex(new Vector( 0.0f,  0.5f, 0.0f), new Vector(255, 0, 0), new Vector(0.5f, 0.0f));
@@ -171,8 +176,11 @@ public class Main {
 	void Render()
 	{
 		renderer.ClearRenderTexture(50, 50, 50);
+		renderer.ClearDepthBuffer();
 		
-		testTriangleMesh.Draw(renderer, transform, testTexture, renderFlags);
+		//testTriangleMesh.Draw(renderer, transform, testTexture, renderFlags);
+		
+		objModelMesh.Draw(renderer, transform, testTexture, renderFlags);
 		
 		window.ShowBuffer(renderer.GetRenderTexture());
 	}

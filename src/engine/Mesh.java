@@ -5,6 +5,12 @@ public class Mesh {
 	
 	int[] m_indices;
 	
+	public Mesh(OBJLoader objLoader)
+	{
+		m_vertices = objLoader.GetVertices();
+		m_indices = objLoader.GetIndices();
+	}
+	
 	public Mesh(Vertex[] vertices, int[] indices)
 	{
 		m_vertices = vertices;

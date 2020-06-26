@@ -11,12 +11,17 @@ public class Renderer {
 	int m_width;
 	int m_height;
 	
+	double[] depthBuffer;
+	
 	Texture renderTexture;
 	
 	public Renderer(int width, int height)
 	{
 		m_width = width;
 		m_height = height;
+		
+		depthBuffer = new double[width * height];
+		ClearDepthBuffer();
 		
 		renderTexture = new Texture(width, height);
 	}
@@ -97,152 +102,92 @@ public class Renderer {
 		yMin = (int) firstLine.get(0).y;
 		yMax = (int) thirdLine.get(thirdLine.size()-1).y;
 		
-		if(v2.GetPosition().x < v3.GetPosition().x)
+		// Set xMin and xMax
+		for(int i = 0; i < firstLine.size(); i++)
 		{
-			// Set xMin
-			for(int i = 0; i < firstLine.size(); i++)
-			{
-				int curr_x = (int) firstLine.get(i).x;
-				int curr_y = (int) firstLine.get(i).y;
-				
-				if(curr_x < xMin[curr_y])
-				{
-					float t = (float)i / (float) firstLine.size();
-					
-					xMin[curr_y] = curr_x;
-					
-					if(lerpPerspCorrect)
-						xMinVert[curr_y] = Vertex.PerspectiveCorrectLerp(v1, v2, t);
-					else
-						xMinVert[curr_y] = Vertex.Lerp(v1, v2, t);
-				}
-			}
-			for(int i = 0; i < thirdLine.size(); i++)
-			{
-				int curr_x = (int) thirdLine.get(i).x;
-				int curr_y = (int) thirdLine.get(i).y;
-				
-				if(curr_x < xMin[curr_y])
-				{
-					float t = (float)i / (float) thirdLine.size();
-					
-					xMin[curr_y] = curr_x;
-					
-					if(lerpPerspCorrect)
-						xMinVert[curr_y] = Vertex.PerspectiveCorrectLerp(v2, v3, t);
-					else
-						xMinVert[curr_y] = Vertex.Lerp(v2, v3, t);
-				}
-			}
+			int curr_x = (int) firstLine.get(i).x;
+			int curr_y = (int) firstLine.get(i).y;
 			
-
-			// Set xMax
-			for(int i = 0; i < secondLine.size(); i++)
+			if(curr_x < xMin[curr_y])
 			{
-				int curr_x = (int) secondLine.get(i).x;
-				int curr_y = (int) secondLine.get(i).y;
+				float t = (float)i / (float) firstLine.size();
 				
-				if(curr_x > xMax[curr_y])
-				{
-					float t = (float) i / (float) secondLine.size();
-					
-					xMax[curr_y] = curr_x;
-					
-					if(lerpPerspCorrect)
-						xMaxVert[curr_y] = Vertex.PerspectiveCorrectLerp(v1, v3, t);
-					else
-						xMaxVert[curr_y] = Vertex.Lerp(v1, v3, t);
-				}
+				xMin[curr_y] = curr_x;
+				
+				if(lerpPerspCorrect)
+					xMinVert[curr_y] = Vertex.PerspectiveCorrectLerp(v1, v2, t);
+				else
+					xMinVert[curr_y] = Vertex.Lerp(v1, v2, t);
+			}
+			if(curr_x > xMax[curr_y])
+			{
+				float t = (float)i / (float) firstLine.size();
+				
+				xMax[curr_y] = curr_x;
+				
+				if(lerpPerspCorrect)
+					xMaxVert[curr_y] = Vertex.PerspectiveCorrectLerp(v1, v2, t);
+				else
+					xMaxVert[curr_y] = Vertex.Lerp(v1, v2, t);
 			}
 		}
-		else // v2.x >= v3.x
+		for(int i = 0; i < thirdLine.size(); i++)
 		{
-			// Set xMin
-			for(int i = 0; i < secondLine.size(); i++)
-			{
-				int curr_x = (int) secondLine.get(i).x;
-				int curr_y = (int) secondLine.get(i).y;
-				
-				if(curr_x < xMin[curr_y])
-				{
-					float t = (float) i / (float) secondLine.size();
-					
-					xMin[curr_y] = curr_x;
-					
-					if(lerpPerspCorrect)
-						xMinVert[curr_y] = Vertex.PerspectiveCorrectLerp(v1, v3, t);
-					else
-						xMinVert[curr_y] = Vertex.Lerp(v1, v3, t);
-				}
-				if(curr_x > xMax[curr_y])
-				{
-					float t = (float) i / (float) secondLine.size();
-					
-					xMax[curr_y] = curr_x;
-					
-					if(lerpPerspCorrect)
-						xMaxVert[curr_y] = Vertex.PerspectiveCorrectLerp(v1, v3, t);
-					else
-						xMaxVert[curr_y] = Vertex.Lerp(v1, v3, t);
-				}
-			}
+			int curr_x = (int) thirdLine.get(i).x;
+			int curr_y = (int) thirdLine.get(i).y;
 			
-			// Set xMax
-			for(int i = 0; i < firstLine.size(); i++)
+			if(curr_x < xMin[curr_y])
 			{
-				int curr_x = (int) firstLine.get(i).x;
-				int curr_y = (int) firstLine.get(i).y;
+				float t = (float)i / (float) thirdLine.size();
 				
-				if(curr_x > xMax[curr_y])
-				{
-					float t = (float) i / (float) firstLine.size();
-					
-					xMax[curr_y] = curr_x;
-					
-					if(lerpPerspCorrect)
-						xMaxVert[curr_y] = Vertex.PerspectiveCorrectLerp(v1, v2, t);
-					else
-						xMaxVert[curr_y] = Vertex.Lerp(v1, v2, t);
-				}
-				if(curr_x < xMin[curr_y])
-				{
-					float t = (float) i / (float) firstLine.size();
-					
-					xMin[curr_y] = curr_x;
-					
-					if(lerpPerspCorrect)
-						xMinVert[curr_y] = Vertex.PerspectiveCorrectLerp(v1, v2, t);
-					else
-						xMinVert[curr_y] = Vertex.Lerp(v1, v2, t);
-				}
+				xMin[curr_y] = curr_x;
+				
+				if(lerpPerspCorrect)
+					xMinVert[curr_y] = Vertex.PerspectiveCorrectLerp(v2, v3, t);
+				else
+					xMinVert[curr_y] = Vertex.Lerp(v2, v3, t);
 			}
-			for(int i = 0; i < thirdLine.size(); i++)
+			if(curr_x > xMax[curr_y])
 			{
-				int curr_x = (int) thirdLine.get(i).x;
-				int curr_y = (int) thirdLine.get(i).y;
+				float t = (float)i / (float) thirdLine.size();
 				
-				if(curr_x > xMax[curr_y])
-				{
-					float t = (float) i / (float) thirdLine.size();
-					
-					xMax[curr_y] = curr_x;
-					
-					if(lerpPerspCorrect)
-						xMaxVert[curr_y] = Vertex.PerspectiveCorrectLerp(v2, v3, t);
-					else
-						xMaxVert[curr_y] = Vertex.Lerp(v2, v3, t);
-				}
-				if(curr_x < xMin[curr_y])
-				{
-					float t = (float) i / (float) thirdLine.size();
-					
-					xMin[curr_y] = curr_x;
-					
-					if(lerpPerspCorrect)
-						xMinVert[curr_y] = Vertex.PerspectiveCorrectLerp(v2, v3, t);
-					else
-						xMinVert[curr_y] = Vertex.Lerp(v2, v3, t);
-				}
+				xMax[curr_y] = curr_x;
+				
+				if(lerpPerspCorrect)
+					xMaxVert[curr_y] = Vertex.PerspectiveCorrectLerp(v2, v3, t);
+				else
+					xMaxVert[curr_y] = Vertex.Lerp(v2, v3, t);
+			}
+		}
+		
+
+		// Set xMax
+		for(int i = 0; i < secondLine.size(); i++)
+		{
+			int curr_x = (int) secondLine.get(i).x;
+			int curr_y = (int) secondLine.get(i).y;
+			
+			if(curr_x > xMax[curr_y])
+			{
+				float t = (float) i / (float) secondLine.size();
+				
+				xMax[curr_y] = curr_x;
+				
+				if(lerpPerspCorrect)
+					xMaxVert[curr_y] = Vertex.PerspectiveCorrectLerp(v1, v3, t);
+				else
+					xMaxVert[curr_y] = Vertex.Lerp(v1, v3, t);
+			}
+			if(curr_x < xMin[curr_y])
+			{
+				float t = (float) i / (float) secondLine.size();
+				
+				xMin[curr_y] = curr_x;
+				
+				if(lerpPerspCorrect)
+					xMinVert[curr_y] = Vertex.PerspectiveCorrectLerp(v1, v3, t);
+				else
+					xMinVert[curr_y] = Vertex.Lerp(v1, v3, t);
 			}
 		}
 		
@@ -269,6 +214,14 @@ public class Renderer {
 					lerpVert = Vertex.PerspectiveCorrectLerp(minVert, maxVert, t);
 				else
 					lerpVert = Vertex.Lerp(minVert, maxVert, t);
+				
+				int depthBufferIndex = x + y*m_height;
+				if(lerpVert.GetPosition().z < depthBuffer[depthBufferIndex])
+				{
+					depthBuffer[depthBufferIndex] = lerpVert.GetPosition().z;
+				}
+				else
+					continue;
 				
 				Vector textureColor = texture.SampleColor(lerpVert.GetTexCoord().x, lerpVert.GetTexCoord().y);
 				
@@ -459,6 +412,14 @@ public class Renderer {
 	public void ClearRenderTexture(int red, int green, int blue)
 	{
 		renderTexture.SetToColor(red, green, blue, 255);
+	}
+	
+	public void ClearDepthBuffer()
+	{
+		for(int i = 0; i < depthBuffer.length; i++)
+		{
+			depthBuffer[i] = 1.0;
+		}
 	}
 	
 	public int GetWidth() { return m_width; }
