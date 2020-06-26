@@ -33,12 +33,17 @@ public class Main {
 	Vertex v1;
 	Vertex v2;
 	Vertex v3;
+	Vertex v4;
 	Mesh testTriangleMesh;
 	
 	double lastTime;
 	double timeInMilliseconds;
 	double deltaTime;
 	double fps;
+	
+	boolean renderWireframe = false;
+	boolean renderPerspectiveIncorrect = false;
+	int renderFlags = 0;
 	
 	public void Init() 
 	{
@@ -55,10 +60,19 @@ public class Main {
 			100.0f
 		);
 		
+		v1 = new Vertex(new Vector(-0.5f,  0.5f, 0.0f), new Vector(255, 0, 0), new Vector(0.0f, 0.0f));
+		v2 = new Vertex(new Vector(-0.5f, -0.5f, 0.0f), new Vector(0, 255, 0), new Vector(0.0f, 1.0f));
+		v3 = new Vertex(new Vector( 0.5f, -0.5f, 0.0f), new Vector(0, 0, 255), new Vector(1.0f, 1.0f));
+		v4 = new Vertex(new Vector( 0.5f,  0.5f, 0.0f), new Vector(255, 255, 0), new Vector(1.0f, 0.0f));
+		testTriangleMesh = new Mesh(new Vertex[]{ v1, v2, v3, v4 }, new int[]{ 0, 1, 2, 0, 2, 3 });
+		
+		
+		/*
 		v1 = new Vertex(new Vector( 0.0f,  0.5f, 0.0f), new Vector(255, 0, 0), new Vector(0.5f, 0.0f));
 		v2 = new Vertex(new Vector(-0.5f, -0.5f, 0.0f), new Vector(0, 255, 0), new Vector(0.0f, 1.0f));
 		v3 = new Vertex(new Vector( 0.5f, -0.5f, 0.0f), new Vector(0, 0, 255), new Vector(1.0f, 1.0f));
-		testTriangleMesh = new Mesh(new Vertex[]{ v1, v2, v3 }, new int[]{ 0, 1, 2 });
+		//v4 = new Vertex(new Vector( 0.5f,  0.5f, 0.0f), new Vector(255, 255, 0), new Vector(1.0f, 0.0f));
+		testTriangleMesh = new Mesh(new Vertex[]{ v1, v2, v3, v4 }, new int[]{ 0, 1, 2 });*/
 		
 		camera = new Camera();
 		
@@ -78,7 +92,7 @@ public class Main {
 			// This might be since Eclipse tries to replace the whole function while the function is not active
 			Update((float) deltaTime);
 			Render();
-			input.UpdatePreviousKeys();
+			//input.UpdatePreviousKeys();
 		}
 		
 		// Exit
@@ -140,13 +154,25 @@ public class Main {
 				100 + (int) (Math.cos(timer)*y - Math.sin(timer)*x), 
 				255, 0, 0, 255);
 		*/
+		
+		// Render flags
+		if(input.GetKeyJustPressed(KeyEvent.VK_R))
+			renderWireframe = !renderWireframe;
+		if(input.GetKeyJustPressed(KeyEvent.VK_T))
+			renderPerspectiveIncorrect = !renderPerspectiveIncorrect;
+		
+		renderFlags = 0;
+		if(renderWireframe)
+			renderFlags |= Renderer.RENDER_FLAGS_WIREFRAME;
+		if(renderPerspectiveIncorrect)
+			renderFlags |= Renderer.RENDER_FLAGS_NON_PERSPECTIVE_CORRECT_INTERPOLATION;
 	}
 	
 	void Render()
 	{
 		renderer.ClearRenderTexture(50, 50, 50);
 		
-		testTriangleMesh.Draw(renderer, transform, testTexture);
+		testTriangleMesh.Draw(renderer, transform, testTexture, renderFlags);
 		
 		window.ShowBuffer(renderer.GetRenderTexture());
 	}

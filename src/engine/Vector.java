@@ -124,5 +124,17 @@ public class Vector {
 			);
 	}
 	
+	public static Vector PerspectiveCorrectLerp(Vector v1, Vector v2, float depth1, float depth2, float t)
+	{
+		float denominator = ((1.0f - t)/depth1 + t/depth2); 
+		
+		float x = ((1.0f - t) * v1.x/depth1 + t*v2.x/depth2) / denominator;
+		float y = ((1.0f - t) * v1.y/depth1 + t*v2.y/depth2) / denominator;
+		float z = ((1.0f - t) * v1.z/depth1 + t*v2.z/depth2) / denominator;
+		float w = ((1.0f - t) * v1.w/depth1 + t*v2.w/depth2) / denominator;
+		
+		return new Vector(x, y, z, w);
+	}
+	
 	public String GetString() { return "x: " + x + "  y: " + y + "  z: " + z + "  w: " + w; }
 }

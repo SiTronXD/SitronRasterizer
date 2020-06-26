@@ -55,6 +55,18 @@ public class Vertex {
 			);
 	}
 	
+	public static Vertex PerspectiveCorrectLerp(Vertex v1, Vertex v2, float t)
+	{
+		float depth1 = v1.GetPosition().w;
+		float depth2 = v2.GetPosition().w;
+		
+		return new Vertex(
+				Vector.PerspectiveCorrectLerp(v1.GetPosition(), v2.GetPosition(), depth1, depth2, t),
+				Vector.PerspectiveCorrectLerp(v1.GetColor(), v2.GetColor(), depth1, depth2, t),
+				Vector.PerspectiveCorrectLerp(v1.GetTexCoord(), v2.GetTexCoord(), depth1, depth2, t)
+			);
+	}
+	
 	public Vector GetPosition() { return m_position; }
 	public Vector GetColor() { return m_color; }
 	public Vector GetTexCoord() { return m_texCoord; }

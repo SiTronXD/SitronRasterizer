@@ -29,17 +29,15 @@ public class Input implements KeyListener {
 	
 	public boolean GetKeyJustPressed(int keyEvent)
 	{
-		return keysDown[keyEvent] && !previousKeysDown[keyEvent];
+		// Bad approach, but I can't get it to work any other way... :/
+		boolean lastPrevious = previousKeysDown[keyEvent];
+		previousKeysDown[keyEvent] = keysDown[keyEvent];
+		
+		return keysDown[keyEvent] && !lastPrevious;
 	}
 	
 	public boolean GetKeyJustReleased(int keyEvent)
 	{
 		return !keysDown[keyEvent] && previousKeysDown[keyEvent];
-	}
-	
-	public void UpdatePreviousKeys()
-	{
-		for(int i = 0; i < previousKeysDown.length; i++)
-			previousKeysDown[i] = keysDown[i];
 	}
 }

@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class Renderer {
+	public static final int RENDER_FLAGS_NO_FLAGS = 0;
+	public static final int RENDER_FLAGS_WIREFRAME = 1;
+	public static final int RENDER_FLAGS_NON_PERSPECTIVE_CORRECT_INTERPOLATION = 2;
+	
 	int m_width;
 	int m_height;
 	
@@ -17,7 +21,7 @@ public class Renderer {
 		renderTexture = new Texture(width, height);
 	}
 	
-	public void DrawTriangle(Matrix transform, Vertex v1, Vertex v2, Vertex v3, Texture texture)
+	public void DrawTriangle(Matrix transform, Vertex v1, Vertex v2, Vertex v3, Texture texture, int renderFlags)
 	{
 		// Local space --> Clip space
 		Vertex transformedV1 = v1.Transform(transform);
@@ -39,86 +43,18 @@ public class Renderer {
 		transformedV1 = transformedV1.TransformToScreenSpace(m_width, m_height);
 		transformedV2 = transformedV2.TransformToScreenSpace(m_width, m_height);
 		transformedV3 = transformedV3.TransformToScreenSpace(m_width, m_height);
-		
-		FillTriangleOnScreen(transformedV1, transformedV2, transformedV3, texture);
-	}
-	
-	public void DrawTriangleWireframe(Matrix transform, Vertex v1, Vertex v2, Vertex v3)
-	{
-		// Local space --> NDC space
-		Vertex transformedV1 = v1.Transform(transform);
-		Vertex transformedV2 = v2.Transform(transform);
-		Vertex transformedV3 = v3.Transform(transform);
-		
-		// Temporary solution for frustum culling
-		if(!(Vertex.IsInsideViewFrustum(transformedV1.GetPosition()) && 
-			 Vertex.IsInsideViewFrustum(transformedV2.GetPosition()) && 
-			 Vertex.IsInsideViewFrustum(transformedV3.GetPosition())))
-			return;
-		
-		// Perspective divide
-		transformedV1.GetPosition().Div(transformedV1.GetPosition().w, transformedV1.GetPosition().w, transformedV1.GetPosition().w, 1.0f);
-		transformedV2.GetPosition().Div(transformedV2.GetPosition().w, transformedV2.GetPosition().w, transformedV2.GetPosition().w, 1.0f);
-		transformedV3.GetPosition().Div(transformedV3.GetPosition().w, transformedV3.GetPosition().w, transformedV3.GetPosition().w, 1.0f);
-		
-		// NDC space --> screen space
-		transformedV1 = transformedV1.TransformToScreenSpace(m_width, m_height);
-		transformedV2 = transformedV2.TransformToScreenSpace(m_width, m_height);
-		transformedV3 = transformedV3.TransformToScreenSpace(m_width, m_height);
-		
-		DrawNonFilledTriangleOnScreen(transformedV1, transformedV2, transformedV3);
-	}
-	
-	public void DrawNonFilledTriangleOnScreen(Vertex v1, Vertex v2, Vertex v3)
-	{
-		// Sort vertices
-		Vertex[] sortedVertices = SortVertices(v1, v2, v3);
-		v1 = sortedVertices[0];
-		v2 = sortedVertices[1];
-		v3 = sortedVertices[2];
 
-		// Find lines and add the points to arraylists
-		ArrayList<Vector> firstLine = DrawLine(
-			(int) v1.GetPosition().x, 
-			(int) v1.GetPosition().y, 
-			(int) v2.GetPosition().x, 
-			(int) v2.GetPosition().y
-		);
-		ArrayList<Vector> secondLine = DrawLine(
-			(int) v1.GetPosition().x,
-			(int) v1.GetPosition().y,
-			(int) v3.GetPosition().x,
-			(int) v3.GetPosition().y
-		);
-		ArrayList<Vector> thirdLine = DrawLine(
-			(int) v2.GetPosition().x,
-			(int) v2.GetPosition().y,
-			(int) v3.GetPosition().x,
-			(int) v3.GetPosition().y
-		);
-		
-		// Add all line points in one single arraylist
-		ArrayList<Vector> allLinePoints = new ArrayList<Vector>();
-		allLinePoints.addAll(firstLine);
-		allLinePoints.addAll(secondLine);
-		allLinePoints.addAll(thirdLine);
-		
-		// Draw the points
-		for(int i = 0; i < allLinePoints.size(); i++)
-		{
-			renderTexture.SetPixel(
-				(int) allLinePoints.get(i).x, 
-				(int) allLinePoints.get(i).y, 
-				255, 
-				255, 
-				255, 
-				255
-			);
-		}
+		// Draw wireframe
+		if((renderFlags & RENDER_FLAGS_WIREFRAME) == RENDER_FLAGS_WIREFRAME)
+			DrawNonFilledTriangleOnScreen(transformedV1, transformedV2, transformedV3);
+		else
+			FillTriangleOnScreen(transformedV1, transformedV2, transformedV3, texture, renderFlags);
 	}
 	
-	public void FillTriangleOnScreen(Vertex v1, Vertex v2, Vertex v3, Texture texture)
+	public void FillTriangleOnScreen(Vertex v1, Vertex v2, Vertex v3, Texture texture, int renderFlags)
 	{
+		boolean lerpPerspCorrect = (renderFlags & RENDER_FLAGS_NON_PERSPECTIVE_CORRECT_INTERPOLATION) != RENDER_FLAGS_NON_PERSPECTIVE_CORRECT_INTERPOLATION;
+		
 		// Sort vertices
 		Vertex[] sortedVertices = SortVertices(v1, v2, v3);
 		v1 = sortedVertices[0];
@@ -174,7 +110,11 @@ public class Renderer {
 					float t = (float)i / (float) firstLine.size();
 					
 					xMin[curr_y] = curr_x;
-					xMinVert[curr_y] = Vertex.Lerp(v1, v2, t);
+					
+					if(lerpPerspCorrect)
+						xMinVert[curr_y] = Vertex.PerspectiveCorrectLerp(v1, v2, t);
+					else
+						xMinVert[curr_y] = Vertex.Lerp(v1, v2, t);
 				}
 			}
 			for(int i = 0; i < thirdLine.size(); i++)
@@ -187,7 +127,11 @@ public class Renderer {
 					float t = (float)i / (float) thirdLine.size();
 					
 					xMin[curr_y] = curr_x;
-					xMinVert[curr_y] = Vertex.Lerp(v2, v3, t);
+					
+					if(lerpPerspCorrect)
+						xMinVert[curr_y] = Vertex.PerspectiveCorrectLerp(v2, v3, t);
+					else
+						xMinVert[curr_y] = Vertex.Lerp(v2, v3, t);
 				}
 			}
 			
@@ -203,11 +147,15 @@ public class Renderer {
 					float t = (float) i / (float) secondLine.size();
 					
 					xMax[curr_y] = curr_x;
-					xMaxVert[curr_y] = Vertex.Lerp(v1, v3, t);
+					
+					if(lerpPerspCorrect)
+						xMaxVert[curr_y] = Vertex.PerspectiveCorrectLerp(v1, v3, t);
+					else
+						xMaxVert[curr_y] = Vertex.Lerp(v1, v3, t);
 				}
 			}
 		}
-		else
+		else // v2.x >= v3.x
 		{
 			// Set xMin
 			for(int i = 0; i < secondLine.size(); i++)
@@ -220,7 +168,22 @@ public class Renderer {
 					float t = (float) i / (float) secondLine.size();
 					
 					xMin[curr_y] = curr_x;
-					xMinVert[curr_y] = Vertex.Lerp(v1, v3, t);
+					
+					if(lerpPerspCorrect)
+						xMinVert[curr_y] = Vertex.PerspectiveCorrectLerp(v1, v3, t);
+					else
+						xMinVert[curr_y] = Vertex.Lerp(v1, v3, t);
+				}
+				if(curr_x > xMax[curr_y])
+				{
+					float t = (float) i / (float) secondLine.size();
+					
+					xMax[curr_y] = curr_x;
+					
+					if(lerpPerspCorrect)
+						xMaxVert[curr_y] = Vertex.PerspectiveCorrectLerp(v1, v3, t);
+					else
+						xMaxVert[curr_y] = Vertex.Lerp(v1, v3, t);
 				}
 			}
 			
@@ -235,7 +198,22 @@ public class Renderer {
 					float t = (float) i / (float) firstLine.size();
 					
 					xMax[curr_y] = curr_x;
-					xMaxVert[curr_y] = Vertex.Lerp(v1, v2, t);
+					
+					if(lerpPerspCorrect)
+						xMaxVert[curr_y] = Vertex.PerspectiveCorrectLerp(v1, v2, t);
+					else
+						xMaxVert[curr_y] = Vertex.Lerp(v1, v2, t);
+				}
+				if(curr_x < xMin[curr_y])
+				{
+					float t = (float) i / (float) firstLine.size();
+					
+					xMin[curr_y] = curr_x;
+					
+					if(lerpPerspCorrect)
+						xMinVert[curr_y] = Vertex.PerspectiveCorrectLerp(v1, v2, t);
+					else
+						xMinVert[curr_y] = Vertex.Lerp(v1, v2, t);
 				}
 			}
 			for(int i = 0; i < thirdLine.size(); i++)
@@ -248,7 +226,22 @@ public class Renderer {
 					float t = (float) i / (float) thirdLine.size();
 					
 					xMax[curr_y] = curr_x;
-					xMaxVert[curr_y] = Vertex.Lerp(v2, v3, t);
+					
+					if(lerpPerspCorrect)
+						xMaxVert[curr_y] = Vertex.PerspectiveCorrectLerp(v2, v3, t);
+					else
+						xMaxVert[curr_y] = Vertex.Lerp(v2, v3, t);
+				}
+				if(curr_x < xMin[curr_y])
+				{
+					float t = (float) i / (float) thirdLine.size();
+					
+					xMin[curr_y] = curr_x;
+					
+					if(lerpPerspCorrect)
+						xMinVert[curr_y] = Vertex.PerspectiveCorrectLerp(v2, v3, t);
+					else
+						xMinVert[curr_y] = Vertex.Lerp(v2, v3, t);
 				}
 			}
 		}
@@ -271,7 +264,11 @@ public class Renderer {
 					t = 1.0f;
 				
 				// Interpolate across the line
-				Vertex lerpVert = Vertex.Lerp(minVert, maxVert, t);
+				Vertex lerpVert;
+				if(lerpPerspCorrect)
+					lerpVert = Vertex.PerspectiveCorrectLerp(minVert, maxVert, t);
+				else
+					lerpVert = Vertex.Lerp(minVert, maxVert, t);
 				
 				Vector textureColor = texture.SampleColor(lerpVert.GetTexCoord().x, lerpVert.GetTexCoord().y);
 				
@@ -285,6 +282,54 @@ public class Renderer {
 					255
 				);
 			}
+		}
+	}
+	
+	public void DrawNonFilledTriangleOnScreen(Vertex v1, Vertex v2, Vertex v3)
+	{
+		// Sort vertices
+		Vertex[] sortedVertices = SortVertices(v1, v2, v3);
+		v1 = sortedVertices[0];
+		v2 = sortedVertices[1];
+		v3 = sortedVertices[2];
+
+		// Find lines and add the points to arraylists
+		ArrayList<Vector> firstLine = DrawLine(
+			(int) v1.GetPosition().x, 
+			(int) v1.GetPosition().y, 
+			(int) v2.GetPosition().x, 
+			(int) v2.GetPosition().y
+		);
+		ArrayList<Vector> secondLine = DrawLine(
+			(int) v1.GetPosition().x,
+			(int) v1.GetPosition().y,
+			(int) v3.GetPosition().x,
+			(int) v3.GetPosition().y
+		);
+		ArrayList<Vector> thirdLine = DrawLine(
+			(int) v2.GetPosition().x,
+			(int) v2.GetPosition().y,
+			(int) v3.GetPosition().x,
+			(int) v3.GetPosition().y
+		);
+		
+		// Add all line points in one single arraylist
+		ArrayList<Vector> allLinePoints = new ArrayList<Vector>();
+		allLinePoints.addAll(firstLine);
+		allLinePoints.addAll(secondLine);
+		allLinePoints.addAll(thirdLine);
+		
+		// Draw the points
+		for(int i = 0; i < allLinePoints.size(); i++)
+		{
+			renderTexture.SetPixel(
+				(int) allLinePoints.get(i).x, 
+				(int) allLinePoints.get(i).y, 
+				255, 
+				255, 
+				255, 
+				255
+			);
 		}
 	}
 	
