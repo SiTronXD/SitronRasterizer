@@ -75,18 +75,28 @@ public class Texture {
 		}
 	}
 	
-	public void SetToColor(int red, int green, int blue, int alpha)
+	public void SetToColor(byte red, byte green, byte blue)
 	{
 		for(int i = 0; i < m_width * m_height; i++)
 		{
-			m_colorChannels[i*NUM_COLOR_CHANNELS + 0] = (byte) red;
-			m_colorChannels[i*NUM_COLOR_CHANNELS + 1] = (byte) green;
-			m_colorChannels[i*NUM_COLOR_CHANNELS + 2] = (byte) blue;
-			m_colorChannels[i*NUM_COLOR_CHANNELS + 3] = (byte) alpha;
+			m_colorChannels[i*NUM_COLOR_CHANNELS + 0] = red;
+			m_colorChannels[i*NUM_COLOR_CHANNELS + 1] = green;
+			m_colorChannels[i*NUM_COLOR_CHANNELS + 2] = blue;
 		}
 	}
 	
-	public Vector SampleColor(float nx, float ny)
+	public void SetToColor(byte red, byte green, byte blue, byte alpha)
+	{
+		for(int i = 0; i < m_width * m_height; i++)
+		{
+			m_colorChannels[i*NUM_COLOR_CHANNELS + 0] = red;
+			m_colorChannels[i*NUM_COLOR_CHANNELS + 1] = green;
+			m_colorChannels[i*NUM_COLOR_CHANNELS + 2] = blue;
+			m_colorChannels[i*NUM_COLOR_CHANNELS + 3] = alpha;
+		}
+	}
+	
+	public void SampleColor(float nx, float ny, Vector newInfoVector)
 	{
 		// Clamp coordinates within texture
 		nx = SMath.Clamp(nx, 0.0f, 1.0f);
@@ -99,14 +109,10 @@ public class Texture {
 		imageIndex = Math.min(m_width * m_height - 1, imageIndex);
 		
 		// Create vector with colors
-		Vector col = new Vector(
-			m_colorChannels[imageIndex * NUM_COLOR_CHANNELS + 0],
-			m_colorChannels[imageIndex * NUM_COLOR_CHANNELS + 1],
-			m_colorChannels[imageIndex * NUM_COLOR_CHANNELS + 2],
-			m_colorChannels[imageIndex * NUM_COLOR_CHANNELS + 3]
-		);
-		
-		return col;
+		newInfoVector.byte_x = m_colorChannels[imageIndex * NUM_COLOR_CHANNELS + 0];
+		newInfoVector.byte_y = m_colorChannels[imageIndex * NUM_COLOR_CHANNELS + 1];
+		newInfoVector.byte_z = m_colorChannels[imageIndex * NUM_COLOR_CHANNELS + 2];
+		newInfoVector.byte_w = m_colorChannels[imageIndex * NUM_COLOR_CHANNELS + 3];
 	}
 	
 	public int GetWidth() { return m_width; }

@@ -26,6 +26,7 @@ public class OBJLoader {
 		
 		ArrayList<Vertex> tempVertices = new ArrayList<Vertex>();
 		ArrayList<Integer> tempIndices = new ArrayList<Integer>();
+		ArrayList<Vector> tempTexCoords = new ArrayList<Vector>();
 		
 		String st;
 		try {
@@ -52,6 +53,16 @@ public class OBJLoader {
 					
 					tempVertices.add(v);
 				}
+				// Texture coordinates
+				else if(splitString[0].matches("vt"))
+				{
+					tempTexCoords.add(
+						new Vector(
+							Float.parseFloat(splitString[1]), 
+							Float.parseFloat(splitString[2])
+						)
+					);
+				}
 				// Index
 				else if(splitString[0].matches("f"))
 				{
@@ -67,8 +78,12 @@ public class OBJLoader {
 						String[] indicesSplitString = splitString[i].split("/");
 						
 						int vertIndex = Integer.parseInt(indicesSplitString[0])-1;
+						int texIndex = Integer.parseInt(indicesSplitString[1])-1;
 						
 						tempIndices.add(new Integer(vertIndex));
+						
+						// Set texture coordinates
+						tempVertices.get(vertIndex).m_texCoord.Set(tempTexCoords.get(texIndex).x, tempTexCoords.get(texIndex).y, 0.0f);
 					}
 				}
 			}
@@ -90,11 +105,22 @@ public class OBJLoader {
 		{
 			m_indices[i] = tempIndices.get(i);
 		}
+		FlipFaces();	// It seems like I'm not ordering the vertices counter-clockwise? Not sure how, but this fixes it anyways.
 		
 		// Print stats
 		System.out.println("Vertex count: " + m_vertices.length);
 		System.out.println("Index count: " + m_indices.length);
-		System.out.println("Vertices to render: " + m_indices.length / 3);
+		System.out.println("Triangles to render: " + m_indices.length / 3);
+	}
+	
+	public void FlipFaces()
+	{
+		for(int i = 0; i < m_indices.length; i += 3)
+		{
+			int temp = m_indices[i + 2];
+			m_indices[i + 2] = m_indices[i + 1];
+			m_indices[i + 1] = temp;
+		}
 	}
 	
 	public Vertex[] GetVertices() { return m_vertices; }

@@ -2,6 +2,12 @@ package engine;
 
 public class Vector {
 	public float x, y, z, w;
+	public byte byte_x, byte_y, byte_z, byte_w;
+	
+	public Vector()
+	{
+		
+	}
 	
 	public Vector(Vector v)
 	{
@@ -35,12 +41,28 @@ public class Vector {
 		w = w_pos;
 	}
 	
+	public Vector(byte byte_x_pos, byte byte_y_pos, byte byte_z_pos, byte byte_w_pos)
+	{
+		byte_x = byte_x_pos;
+		byte_y = byte_y_pos;
+		byte_z = byte_z_pos;
+		byte_w = byte_w_pos;
+	}
+	
 	public void Add(Vector v)
 	{
 		x += v.x;
 		y += v.y;
 		z += v.z;
 		w += v.w;
+	}
+	
+	public void Sub(Vector v)
+	{
+		x -= v.x;
+		y -= v.y;
+		z -= v.z;
+		w -= v.w;
 	}
 	
 	public void Scale(float s)
@@ -124,6 +146,7 @@ public class Vector {
 			);
 	}
 	
+	// Interpolate between two vectors, based on a scalar t, with respect to the vertices non-linear depth
 	public static Vector PerspectiveCorrectLerp(Vector v1, Vector v2, float depth1, float depth2, float t)
 	{
 		float denominator = ((1.0f - t)/depth1 + t/depth2); 
@@ -134,6 +157,28 @@ public class Vector {
 		float w = ((1.0f - t) * v1.w/depth1 + t*v2.w/depth2) / denominator;
 		
 		return new Vector(x, y, z, w);
+	}
+	
+	// Linearly interpolate between two vectors, based on a scalar t
+	public static void Lerp(Vector v1, Vector v2, float t, Vector newInfoVector)
+	{
+		newInfoVector.x = v1.x + (v2.x - v1.x) * t;
+		newInfoVector.y = v1.y + (v2.y - v1.y) * t;
+		newInfoVector.z = v1.z + (v2.z - v1.z) * t;
+		newInfoVector.w = v1.w + (v2.w - v1.w) * t;
+	}
+	
+	// Interpolate between two vectors, based on a scalar t, with respect to the vertices non-linear depth
+	public static void PerspectiveCorrectLerp(Vector v1, Vector v2, float depth1, float depth2, float t, Vector newInfoVector)
+	{
+		float denominator = ((1.0f - t)/depth1 + t/depth2); 
+		float leftSideScale = (1.0f - t) / depth1;
+		float rightSideScale = t / depth2;
+		
+		newInfoVector.x = (leftSideScale * v1.x + rightSideScale * v2.x) / denominator;
+		newInfoVector.y = (leftSideScale * v1.y + rightSideScale * v2.y) / denominator;
+		newInfoVector.z = (leftSideScale * v1.z + rightSideScale * v2.z) / denominator;
+		newInfoVector.w = (leftSideScale * v1.w + rightSideScale * v2.w) / denominator;
 	}
 	
 	public String GetString() { return "x: " + x + "  y: " + y + "  z: " + z + "  w: " + w; }

@@ -68,8 +68,8 @@ public class Main {
 		v4 = new Vertex(new Vector( 0.5f,  0.5f, 0.0f), new Vector(255, 255, 0), new Vector(1.0f, 0.0f));
 		testTriangleMesh = new Mesh(new Vertex[]{ v1, v2, v3, v4 }, new int[]{ 0, 1, 2, 0, 2, 3 });
 		
-		//OBJLoader objLoader = new OBJLoader("./res/gfx/monkey2.obj");
-		OBJLoader objLoader = new OBJLoader("./res/gfx/sphere.obj");
+		OBJLoader objLoader = new OBJLoader("./res/gfx/monkey2.obj");
+		//OBJLoader objLoader = new OBJLoader("./res/gfx/sphere.obj");
 		objModelMesh = new Mesh(objLoader);
 		
 		/*
@@ -144,9 +144,9 @@ public class Main {
 		camera.Move(r, u, f);
 		
 		transform = Matrix.Identity();
-		transform = Matrix.MatMatMul(Matrix.Translate(0.0f, 0.0f, 1.0f), transform);
-		transform = Matrix.MatMatMul(Matrix.RotateY(timer), transform);
-		transform = Matrix.MatMatMul(Matrix.Translate(0.0f, 0.0f, 2.0f), transform);
+		//transform = Matrix.MatMatMul(Matrix.Translate(0.0f, 0.0f, 1.0f), transform);
+		transform = Matrix.MatMatMul(Matrix.RotateY((float)Math.PI), transform);
+		transform = Matrix.MatMatMul(Matrix.Translate(0.0f, 0.0f, 1.6f), transform);
 		transform = Matrix.MatMatMul(camera.GetViewMat(), transform);
 		transform = Matrix.MatMatMul(perspectiveTransform, transform);
 		
@@ -175,7 +175,7 @@ public class Main {
 	
 	void Render()
 	{
-		renderer.ClearRenderTexture(50, 50, 50);
+		renderer.ClearRenderTexture((byte)0x32, (byte)0x32, (byte)0x32);
 		renderer.ClearDepthBuffer();
 		
 		//testTriangleMesh.Draw(renderer, transform, testTexture, renderFlags);

@@ -15,6 +15,13 @@ public class Renderer {
 	
 	Texture renderTexture;
 	
+	Vertex[] xMinVert;// = new Vertex[m_height];
+	Vertex[] xMaxVert;// = new Vertex[m_height];
+	int[] xMin;// = new int[m_height];
+	int[] xMax;// = new int[m_height];
+	int yMin;// = 0;
+	int yMax;// = 0;
+	
 	public Renderer(int width, int height)
 	{
 		m_width = width;
@@ -24,6 +31,21 @@ public class Renderer {
 		ClearDepthBuffer();
 		
 		renderTexture = new Texture(width, height);
+		
+		
+		// Setup min and max boundaries for the horizontal lines in the triangle
+		xMinVert = new Vertex[m_height];
+		xMaxVert = new Vertex[m_height];
+		xMin = new int[m_height];
+		xMax = new int[m_height];
+		yMin = 0;
+		yMax = 0;
+		
+		for(int i = 0; i < xMinVert.length; i++)
+		{
+			xMinVert[i] = new Vertex();
+			xMaxVert[i] = new Vertex();
+		}
 	}
 	
 	public void DrawTriangle(Matrix transform, Vertex v1, Vertex v2, Vertex v3, Texture texture, int renderFlags)
@@ -43,6 +65,12 @@ public class Renderer {
 		transformedV1.GetPosition().Div(transformedV1.GetPosition().w, transformedV1.GetPosition().w, transformedV1.GetPosition().w, 1.0f);
 		transformedV2.GetPosition().Div(transformedV2.GetPosition().w, transformedV2.GetPosition().w, transformedV2.GetPosition().w, 1.0f);
 		transformedV3.GetPosition().Div(transformedV3.GetPosition().w, transformedV3.GetPosition().w, transformedV3.GetPosition().w, 1.0f);
+		
+		// Back-face culling
+		Vector edge0 = new Vector(transformedV2.GetPosition()); edge0.Sub(transformedV1.GetPosition());
+		Vector edge1 = new Vector(transformedV3.GetPosition()); edge1.Sub(transformedV1.GetPosition());
+		Vector normal = Vector.Cross(edge0, edge1);
+		if(normal.z >= 0.0) { return; }
 		
 		// NDC space --> screen space
 		transformedV1 = transformedV1.TransformToScreenSpace(m_width, m_height);
@@ -66,19 +94,7 @@ public class Renderer {
 		v2 = sortedVertices[1];
 		v3 = sortedVertices[2];
 
-		// Setup min and max boundaries for the horizontal lines in the triangle
-		Vertex[] xMinVert = new Vertex[m_height];
-		Vertex[] xMaxVert = new Vertex[m_height];
-		int[] xMin = new int[m_height];
-		int[] xMax = new int[m_height];
-		int yMin = 0;
-		int yMax = 0;
-		
-		// Set extreme initial boundaries for min and max
-		for(int i = 0; i < xMin.length; i++)
-			xMin[i] = m_width+1;
-		for(int i = 0; i < xMax.length; i++)
-			xMax[i] = -1;
+		ResetMinMaxBounds();
 		
 		// Find lines and add the points to arraylists
 		ArrayList<Vector> firstLine = DrawLine(
@@ -102,96 +118,13 @@ public class Renderer {
 		yMin = (int) firstLine.get(0).y;
 		yMax = (int) thirdLine.get(thirdLine.size()-1).y;
 		
-		// Set xMin and xMax
-		for(int i = 0; i < firstLine.size(); i++)
-		{
-			int curr_x = (int) firstLine.get(i).x;
-			int curr_y = (int) firstLine.get(i).y;
-			
-			if(curr_x < xMin[curr_y])
-			{
-				float t = (float)i / (float) firstLine.size();
-				
-				xMin[curr_y] = curr_x;
-				
-				if(lerpPerspCorrect)
-					xMinVert[curr_y] = Vertex.PerspectiveCorrectLerp(v1, v2, t);
-				else
-					xMinVert[curr_y] = Vertex.Lerp(v1, v2, t);
-			}
-			if(curr_x > xMax[curr_y])
-			{
-				float t = (float)i / (float) firstLine.size();
-				
-				xMax[curr_y] = curr_x;
-				
-				if(lerpPerspCorrect)
-					xMaxVert[curr_y] = Vertex.PerspectiveCorrectLerp(v1, v2, t);
-				else
-					xMaxVert[curr_y] = Vertex.Lerp(v1, v2, t);
-			}
-		}
-		for(int i = 0; i < thirdLine.size(); i++)
-		{
-			int curr_x = (int) thirdLine.get(i).x;
-			int curr_y = (int) thirdLine.get(i).y;
-			
-			if(curr_x < xMin[curr_y])
-			{
-				float t = (float)i / (float) thirdLine.size();
-				
-				xMin[curr_y] = curr_x;
-				
-				if(lerpPerspCorrect)
-					xMinVert[curr_y] = Vertex.PerspectiveCorrectLerp(v2, v3, t);
-				else
-					xMinVert[curr_y] = Vertex.Lerp(v2, v3, t);
-			}
-			if(curr_x > xMax[curr_y])
-			{
-				float t = (float)i / (float) thirdLine.size();
-				
-				xMax[curr_y] = curr_x;
-				
-				if(lerpPerspCorrect)
-					xMaxVert[curr_y] = Vertex.PerspectiveCorrectLerp(v2, v3, t);
-				else
-					xMaxVert[curr_y] = Vertex.Lerp(v2, v3, t);
-			}
-		}
-		
-
-		// Set xMax
-		for(int i = 0; i < secondLine.size(); i++)
-		{
-			int curr_x = (int) secondLine.get(i).x;
-			int curr_y = (int) secondLine.get(i).y;
-			
-			if(curr_x > xMax[curr_y])
-			{
-				float t = (float) i / (float) secondLine.size();
-				
-				xMax[curr_y] = curr_x;
-				
-				if(lerpPerspCorrect)
-					xMaxVert[curr_y] = Vertex.PerspectiveCorrectLerp(v1, v3, t);
-				else
-					xMaxVert[curr_y] = Vertex.Lerp(v1, v3, t);
-			}
-			if(curr_x < xMin[curr_y])
-			{
-				float t = (float) i / (float) secondLine.size();
-				
-				xMin[curr_y] = curr_x;
-				
-				if(lerpPerspCorrect)
-					xMinVert[curr_y] = Vertex.PerspectiveCorrectLerp(v1, v3, t);
-				else
-					xMinVert[curr_y] = Vertex.Lerp(v1, v3, t);
-			}
-		}
+		SetMinMaxLineBounds(firstLine, v1, v2, lerpPerspCorrect);
+		SetMinMaxLineBounds(secondLine, v1, v3, lerpPerspCorrect);
+		SetMinMaxLineBounds(thirdLine, v2, v3, lerpPerspCorrect);
 		
 		// Go from top to bottom in the triangle
+		Vertex tempLerpVertex = new Vertex();
+		Vector textureColor = new Vector();
 		for(int y = yMin; y <= yMax; y++)
 		{
 			Vertex minVert = xMinVert[y];
@@ -209,29 +142,30 @@ public class Renderer {
 					t = 1.0f;
 				
 				// Interpolate across the line
-				Vertex lerpVert;
 				if(lerpPerspCorrect)
-					lerpVert = Vertex.PerspectiveCorrectLerp(minVert, maxVert, t);
+					Vertex.PerspectiveCorrectLerp(minVert, maxVert, t, tempLerpVertex);
 				else
-					lerpVert = Vertex.Lerp(minVert, maxVert, t);
+					Vertex.Lerp(minVert, maxVert, t, tempLerpVertex);
 				
+				// Depth buffer
 				int depthBufferIndex = x + y*m_height;
-				if(lerpVert.GetPosition().z < depthBuffer[depthBufferIndex])
+				if(tempLerpVertex.GetPosition().z < depthBuffer[depthBufferIndex])	
 				{
-					depthBuffer[depthBufferIndex] = lerpVert.GetPosition().z;
+					depthBuffer[depthBufferIndex] = tempLerpVertex.GetPosition().z;
 				}
 				else
 					continue;
 				
-				Vector textureColor = texture.SampleColor(lerpVert.GetTexCoord().x, lerpVert.GetTexCoord().y);
+				// Find texture color
+				texture.SampleColor(tempLerpVertex.GetTexCoord().x, tempLerpVertex.GetTexCoord().y, textureColor);
 				
 				// Render!
 				renderTexture.SetPixel(
 					x, 
 					y, 
-					(int) (textureColor.x), 
-					(int) (textureColor.y), 
-					(int) (textureColor.z), 
+					textureColor.byte_x, 
+					textureColor.byte_y, 
+					textureColor.byte_z, 
 					255
 				);
 			}
@@ -373,6 +307,47 @@ public class Renderer {
 		return storedPoints;
 	}
 	
+	void ResetMinMaxBounds()
+	{
+		// Set extreme initial boundaries for min and max
+		for(int i = 0; i < xMin.length; i++)
+			xMin[i] = m_width+1;
+		for(int i = 0; i < xMax.length; i++)
+			xMax[i] = -1;
+	}
+	
+	void SetMinMaxLineBounds(ArrayList<Vector> line, Vertex v1, Vertex v2, boolean lerpPerspCorrect)
+	{
+		for(int i = 0; i < line.size(); i++)
+		{
+			int curr_x = (int) line.get(i).x;
+			int curr_y = (int) line.get(i).y;
+			
+			if(curr_x < xMin[curr_y])
+			{
+				float t = (float)i / (float) line.size();
+				
+				xMin[curr_y] = curr_x;
+				
+				if(lerpPerspCorrect)
+					Vertex.PerspectiveCorrectLerp(v1, v2, t, xMinVert[curr_y]);
+				else
+					Vertex.Lerp(v1, v2, t, xMinVert[curr_y]);
+			}
+			if(curr_x > xMax[curr_y])
+			{
+				float t = (float)i / (float) line.size();
+				
+				xMax[curr_y] = curr_x;
+				
+				if(lerpPerspCorrect)
+					Vertex.PerspectiveCorrectLerp(v1, v2, t, xMaxVert[curr_y]);
+				else
+					Vertex.Lerp(v1, v2, t, xMaxVert[curr_y]);
+			}
+		}
+	}
+	
 	// Brute force sort through the 3 vertices
 	Vertex[] SortVertices(Vertex v1, Vertex v2, Vertex v3)
 	{
@@ -409,9 +384,9 @@ public class Renderer {
 		return new Vertex[] { v1, v2, v3 };
 	}
 	
-	public void ClearRenderTexture(int red, int green, int blue)
+	public void ClearRenderTexture(byte red, byte green, byte blue)
 	{
-		renderTexture.SetToColor(red, green, blue, 255);
+		renderTexture.SetToColor(red, green, blue);
 	}
 	
 	public void ClearDepthBuffer()
