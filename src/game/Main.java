@@ -11,6 +11,8 @@ import engine.Texture;
 import engine.Vector;
 import engine.Vertex;
 import engine.Window;
+import engine.shaders.ChromaticAberrationShader;
+import engine.shaders.DefaultShader;
 
 public class Main {
 	static int screenWidth = 1280;
@@ -52,6 +54,7 @@ public class Main {
 		window = new Window(screenWidth, screenHeight, "Sitron Rasterizer!!!");
 		input = new Input();
 		renderer = new Renderer(screenWidth, screenHeight);
+		renderer.SetShader(new ChromaticAberrationShader());
 		
 		window.SetKeyListener(input);
 		
@@ -97,6 +100,7 @@ public class Main {
 			// This might be since Eclipse tries to replace the whole function while the function is not active
 			Update((float) deltaTime);
 			Render();
+			renderer.Update((float) deltaTime);
 			//input.UpdatePreviousKeys();
 		}
 		
@@ -144,8 +148,7 @@ public class Main {
 		camera.Move(r, u, f);
 		
 		transform = Matrix.Identity();
-		//transform = Matrix.MatMatMul(Matrix.Translate(0.0f, 0.0f, 1.0f), transform);
-		transform = Matrix.MatMatMul(Matrix.RotateY((float)Math.PI), transform);
+		//transform = Matrix.MatMatMul(Matrix.RotateY((float)Math.PI), transform);
 		transform = Matrix.MatMatMul(Matrix.Translate(0.0f, 0.0f, 1.6f), transform);
 		transform = Matrix.MatMatMul(camera.GetViewMat(), transform);
 		transform = Matrix.MatMatMul(perspectiveTransform, transform);
@@ -178,9 +181,12 @@ public class Main {
 		renderer.ClearRenderTexture((byte)0x32, (byte)0x32, (byte)0x32);
 		renderer.ClearDepthBuffer();
 		
-		//testTriangleMesh.Draw(renderer, transform, testTexture, renderFlags);
+		// Update shader
+		renderer.GetShader().SetMatrix("MVP", transform);
+		renderer.GetShader().SetTexture("DiffuseTexture", testTexture);
+		testTriangleMesh.Draw(renderer, renderFlags);
 		
-		objModelMesh.Draw(renderer, transform, testTexture, renderFlags);
+		//objModelMesh.Draw(renderer, transform, testTexture, renderFlags);
 		
 		window.ShowBuffer(renderer.GetRenderTexture());
 	}

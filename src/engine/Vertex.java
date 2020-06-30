@@ -1,9 +1,9 @@
 package engine;
 
 public class Vertex {
-	Vector m_position;
-	Vector m_color;
-	Vector m_texCoord;
+	public Vector m_position;
+	public Vector m_color;
+	public Vector m_texCoord;
 	
 	public Vertex()
 	{
@@ -19,15 +19,11 @@ public class Vertex {
 		m_texCoord = texCoord;
 	}
 	
-	public Vertex Transform(Matrix transform)
+	public Vertex(Vertex oldVertex)
 	{
-		Vector newPos = Matrix.MatVecMul(transform, m_position);
-		
-		return new Vertex(
-			newPos,
-			m_color,
-			m_texCoord
-		);
+		m_position = new Vector(oldVertex.m_position);
+		m_color = new Vector(oldVertex.m_color);
+		m_texCoord = new Vector(oldVertex.m_texCoord);
 	}
 	
 	public Vertex TransformToScreenSpace(float width, float height)

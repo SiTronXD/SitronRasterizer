@@ -8,6 +8,7 @@ public class Matrix {
 		m = new float[4][4];
 	}
 	
+	// Identity matrix
 	public static Matrix Identity() 
 	{
 		Matrix ssm = new Matrix();
@@ -20,6 +21,7 @@ public class Matrix {
 		return ssm;
 	}
 	
+	// Rotate around the X-axis
 	public static Matrix RotateX(float radiansAngle)
 	{
 		Matrix rotMat = new Matrix();
@@ -35,6 +37,7 @@ public class Matrix {
 		return rotMat;
 	}
 	
+	// Rotate around the Y-axis
 	public static Matrix RotateY(float radiansAngle)
 	{
 		Matrix rotMat = new Matrix();
@@ -50,6 +53,7 @@ public class Matrix {
 		return rotMat;
 	}
 	
+	// Rotate around the Z-axis
 	public static Matrix RotateZ(float radiansAngle)
 	{
 		Matrix rotMat = new Matrix();
@@ -65,6 +69,7 @@ public class Matrix {
 		return rotMat;
 	}
 	
+	// Translation matrix
 	public static Matrix Translate(float x, float y, float z)
 	{
 		Matrix tm = new Matrix();
@@ -77,6 +82,7 @@ public class Matrix {
 		return tm;
 	}
 	
+	// View matrix
 	public static Matrix View(Vector position, Vector forward, Vector worldUp)
 	{
 		Vector right = Vector.Cross(forward, worldUp);
@@ -96,6 +102,7 @@ public class Matrix {
 		return MatMatMul(rotMat, translationMat);
 	}
 	
+	// Perspective projection matrix
 	public static Matrix Perspective(float aspectRatio, float fov, float near, float far)
 	{
 		Matrix pm = new Matrix();
@@ -124,6 +131,7 @@ public class Matrix {
 		return ssm;
 	}
 	
+	// Matrix X Matrix multiplication
 	public static Matrix MatMatMul(Matrix mat1, Matrix mat2)
 	{
 		int maxCols = mat2.m[0].length;

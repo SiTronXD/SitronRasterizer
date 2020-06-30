@@ -3,6 +3,8 @@ package engine;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import engine.shaders.DefaultShader;
+
 public class Renderer {
 	public static final int RENDER_FLAGS_NO_FLAGS = 0;
 	public static final int RENDER_FLAGS_WIREFRAME = 1;
@@ -11,9 +13,11 @@ public class Renderer {
 	int m_width;
 	int m_height;
 	
-	double[] depthBuffer;
+	double[] m_depthBuffer;
 	
-	Texture renderTexture;
+	Shader m_shader;
+	
+	Texture m_renderTexture;
 	
 	Vertex[] xMinVert;// = new Vertex[m_height];
 	Vertex[] xMaxVert;// = new Vertex[m_height];
@@ -27,10 +31,12 @@ public class Renderer {
 		m_width = width;
 		m_height = height;
 		
-		depthBuffer = new double[width * height];
+		m_depthBuffer = new double[width * height];
 		ClearDepthBuffer();
 		
-		renderTexture = new Texture(width, height);
+		m_shader = new DefaultShader();
+		
+		m_renderTexture = new Texture(width, height);
 		
 		
 		// Setup min and max boundaries for the horizontal lines in the triangle
@@ -48,13 +54,17 @@ public class Renderer {
 		}
 	}
 	
-	public void DrawTriangle(Matrix transform, Vertex v1, Vertex v2, Vertex v3, Texture texture, int renderFlags)
+	public void DrawTriangle(Vertex v1, Vertex v2, Vertex v3, int renderFlags)
 	{
+		Vertex transformedV1 = new Vertex(v1);
+		Vertex transformedV2 = new Vertex(v2);
+		Vertex transformedV3 = new Vertex(v3);
+
 		// Local space --> Clip space
-		Vertex transformedV1 = v1.Transform(transform);
-		Vertex transformedV2 = v2.Transform(transform);
-		Vertex transformedV3 = v3.Transform(transform);
-		
+		m_shader.VertexShader(v1, transformedV1.m_position);
+		m_shader.VertexShader(v2, transformedV2.m_position);
+		m_shader.VertexShader(v3, transformedV3.m_position);
+
 		// Temporary solution for frustum culling
 		if(!(Vertex.IsInsideViewFrustum(transformedV1.GetPosition()) && 
 			 Vertex.IsInsideViewFrustum(transformedV2.GetPosition()) && 
@@ -81,10 +91,10 @@ public class Renderer {
 		if((renderFlags & RENDER_FLAGS_WIREFRAME) == RENDER_FLAGS_WIREFRAME)
 			DrawNonFilledTriangleOnScreen(transformedV1, transformedV2, transformedV3);
 		else
-			FillTriangleOnScreen(transformedV1, transformedV2, transformedV3, texture, renderFlags);
+			FillTriangleOnScreen(transformedV1, transformedV2, transformedV3, renderFlags);
 	}
 	
-	public void FillTriangleOnScreen(Vertex v1, Vertex v2, Vertex v3, Texture texture, int renderFlags)
+	public void FillTriangleOnScreen(Vertex v1, Vertex v2, Vertex v3, int renderFlags)
 	{
 		boolean lerpPerspCorrect = (renderFlags & RENDER_FLAGS_NON_PERSPECTIVE_CORRECT_INTERPOLATION) != RENDER_FLAGS_NON_PERSPECTIVE_CORRECT_INTERPOLATION;
 		
@@ -124,7 +134,7 @@ public class Renderer {
 		
 		// Go from top to bottom in the triangle
 		Vertex tempLerpVertex = new Vertex();
-		Vector textureColor = new Vector();
+		Vector pixelColor = new Vector();
 		for(int y = yMin; y <= yMax; y++)
 		{
 			Vertex minVert = xMinVert[y];
@@ -149,23 +159,24 @@ public class Renderer {
 				
 				// Depth buffer
 				int depthBufferIndex = x + y*m_height;
-				if(tempLerpVertex.GetPosition().z < depthBuffer[depthBufferIndex])	
+				if(tempLerpVertex.GetPosition().z < m_depthBuffer[depthBufferIndex])	
 				{
-					depthBuffer[depthBufferIndex] = tempLerpVertex.GetPosition().z;
+					m_depthBuffer[depthBufferIndex] = tempLerpVertex.GetPosition().z;
 				}
 				else
 					continue;
 				
-				// Find texture color
-				texture.SampleColor(tempLerpVertex.GetTexCoord().x, tempLerpVertex.GetTexCoord().y, textureColor);
+				// Find a pixel color
+				pixelColor.Set(0.0f, 0.0f, 0.0f);
+				m_shader.FragmentShader(tempLerpVertex, pixelColor);
 				
 				// Render!
-				renderTexture.SetPixel(
+				m_renderTexture.SetPixel(
 					x, 
 					y, 
-					textureColor.byte_x, 
-					textureColor.byte_y, 
-					textureColor.byte_z, 
+					pixelColor.byte_x, 
+					pixelColor.byte_y, 
+					pixelColor.byte_z, 
 					255
 				);
 			}
@@ -209,7 +220,7 @@ public class Renderer {
 		// Draw the points
 		for(int i = 0; i < allLinePoints.size(); i++)
 		{
-			renderTexture.SetPixel(
+			m_renderTexture.SetPixel(
 				(int) allLinePoints.get(i).x, 
 				(int) allLinePoints.get(i).y, 
 				255, 
@@ -386,19 +397,31 @@ public class Renderer {
 	
 	public void ClearRenderTexture(byte red, byte green, byte blue)
 	{
-		renderTexture.SetToColor(red, green, blue);
+		m_renderTexture.SetToColor(red, green, blue);
 	}
 	
 	public void ClearDepthBuffer()
 	{
-		for(int i = 0; i < depthBuffer.length; i++)
+		for(int i = 0; i < m_depthBuffer.length; i++)
 		{
-			depthBuffer[i] = 1.0;
+			m_depthBuffer[i] = 1.0;
 		}
+	}
+	
+	public void Update(float dt)
+	{
+		m_shader.Update(dt);
+	}
+	
+	public void SetShader(Shader newShader)
+	{
+		m_shader = newShader;
 	}
 	
 	public int GetWidth() { return m_width; }
 	public int GetHeight() { return m_height; }
 	
-	public Texture GetRenderTexture() { return renderTexture; }
+	public Texture GetRenderTexture() { return m_renderTexture; }
+	
+	public Shader GetShader() { return m_shader; }
 }

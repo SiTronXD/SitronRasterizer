@@ -181,5 +181,13 @@ public class Vector {
 		newInfoVector.w = (leftSideScale * v1.w + rightSideScale * v2.w) / denominator;
 	}
 	
+	public void SetByteValsToFloatVals()
+	{
+		byte_x = (byte) x;
+		byte_y = (byte) y;
+		byte_z = (byte) z;
+		byte_w = (byte) w; 
+	}
+	
 	public String GetString() { return "x: " + x + "  y: " + y + "  z: " + z + "  w: " + w; }
 }

@@ -13,6 +13,8 @@ public class Texture {
 	int m_width;
 	int m_height;
 	
+	public Texture() { }
+	
 	public Texture(int width, int height)
 	{
 		m_width = width;
@@ -97,6 +99,25 @@ public class Texture {
 	}
 	
 	public void SampleColor(float nx, float ny, Vector newInfoVector)
+	{
+		// Clamp coordinates within texture
+		nx = SMath.Clamp(nx, 0.0f, 1.0f);
+		ny = SMath.Clamp(ny, 0.0f, 1.0f);
+		
+		// Use coordinates to find index in m_colorChannels
+		int realX = (int)(nx * m_width);
+		int realY = (int)(ny * m_height);
+		int imageIndex = realX + realY * m_width;
+		imageIndex = Math.min(m_width * m_height - 1, imageIndex);
+		
+		// Create vector with colors
+		newInfoVector.x = m_colorChannels[imageIndex * NUM_COLOR_CHANNELS + 0];
+		newInfoVector.y = m_colorChannels[imageIndex * NUM_COLOR_CHANNELS + 1];
+		newInfoVector.z = m_colorChannels[imageIndex * NUM_COLOR_CHANNELS + 2];
+		newInfoVector.w = m_colorChannels[imageIndex * NUM_COLOR_CHANNELS + 3];
+	}
+	
+	public void SampleColorByte(float nx, float ny, Vector newInfoVector)
 	{
 		// Clamp coordinates within texture
 		nx = SMath.Clamp(nx, 0.0f, 1.0f);
