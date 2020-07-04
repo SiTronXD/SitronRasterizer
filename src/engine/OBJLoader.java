@@ -68,7 +68,8 @@ public class OBJLoader {
 				{
 					for(int i = 1; i < splitString.length; i++)
 					{
-						if(i == 4)
+						// Add the last 2 vertices to the triangle
+						if(i >= 4)
 						{
 							tempIndices.add(tempIndices.get(tempIndices.size()-3));
 							tempIndices.add(tempIndices.get(tempIndices.size()-2));

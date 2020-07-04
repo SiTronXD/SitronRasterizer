@@ -54,7 +54,7 @@ public class Main {
 		window = new Window(screenWidth, screenHeight, "Sitron Rasterizer!!!");
 		input = new Input();
 		renderer = new Renderer(screenWidth, screenHeight);
-		renderer.SetShader(new ChromaticAberrationShader());
+		//renderer.SetShader(new ChromaticAberrationShader());
 		
 		window.SetKeyListener(input);
 		
@@ -73,6 +73,7 @@ public class Main {
 		
 		OBJLoader objLoader = new OBJLoader("./res/gfx/monkey2.obj");
 		//OBJLoader objLoader = new OBJLoader("./res/gfx/sphere.obj");
+		//OBJLoader objLoader = new OBJLoader("./res/gfx/TempleOSRightSide.obj");
 		objModelMesh = new Mesh(objLoader);
 		
 		/*
@@ -184,9 +185,11 @@ public class Main {
 		// Update shader
 		renderer.GetShader().SetMatrix("MVP", transform);
 		renderer.GetShader().SetTexture("DiffuseTexture", testTexture);
-		testTriangleMesh.Draw(renderer, renderFlags);
 		
-		//objModelMesh.Draw(renderer, transform, testTexture, renderFlags);
+		// Render mesh
+		//testTriangleMesh.Draw(renderer, renderFlags);
+		
+		objModelMesh.Draw(renderer, renderFlags);
 		
 		window.ShowBuffer(renderer.GetRenderTexture());
 	}
