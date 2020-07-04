@@ -73,7 +73,7 @@ public class Main {
 		
 		OBJLoader objLoader = new OBJLoader("./res/gfx/monkey2.obj");
 		//OBJLoader objLoader = new OBJLoader("./res/gfx/sphere.obj");
-		//OBJLoader objLoader = new OBJLoader("./res/gfx/TempleOSRightSide.obj");
+		//OBJLoader objLoader = new OBJLoader("./res/gfx/TempleOSLeftSide.obj");
 		objModelMesh = new Mesh(objLoader);
 		
 		/*
@@ -86,7 +86,7 @@ public class Main {
 		camera = new Camera();
 		
 		testTexture = new Texture("./res/gfx/howBoutYallFellas.png");
-		//testTexture = new Texture("./res/gfx/CEOOfDrunk.png");
+		//testTexture = new Texture("./res/gfx/WhiteBlackTexture.png");
 		
 		// Main loop
 		lastTime = System.nanoTime();
