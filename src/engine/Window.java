@@ -74,4 +74,7 @@ public class Window extends Canvas
 	{
 		addKeyListener(kl);
 	}
+	
+	public int GetWidth() { return m_windowSize.width; }
+	public int GetHeight() { return m_windowSize.height; }
 }

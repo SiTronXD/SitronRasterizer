@@ -46,7 +46,7 @@ public class Vertex {
 	{
 		return 	Math.abs(transformedVertexPosition.x) <= Math.abs(transformedVertexPosition.w) && 
 				Math.abs(transformedVertexPosition.y) <= Math.abs(transformedVertexPosition.w) &&
-				Math.abs(transformedVertexPosition.z) <= Math.abs(transformedVertexPosition.w);
+				transformedVertexPosition.z <= transformedVertexPosition.w && transformedVertexPosition.z >= 0.0f;
 	}
 	
 	public static Vertex Lerp(Vertex v1, Vertex v2, float t)

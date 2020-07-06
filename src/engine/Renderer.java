@@ -65,7 +65,7 @@ public class Renderer {
 		m_shader.VertexShader(v2, transformedV2.m_position);
 		m_shader.VertexShader(v3, transformedV3.m_position);
 
-		// Temporary solution for frustum culling
+		// Frustum culling
 		if(!(Vertex.IsInsideViewFrustum(transformedV1.GetPosition()) && 
 			 Vertex.IsInsideViewFrustum(transformedV2.GetPosition()) && 
 			 Vertex.IsInsideViewFrustum(transformedV3.GetPosition())))
@@ -158,7 +158,7 @@ public class Renderer {
 					Vertex.Lerp(minVert, maxVert, t, tempLerpVertex);
 				
 				// Depth buffer
-				int depthBufferIndex = x + y*m_height;
+				int depthBufferIndex = x + y*m_width;
 				if(tempLerpVertex.GetPosition().z < m_depthBuffer[depthBufferIndex])	
 				{
 					m_depthBuffer[depthBufferIndex] = tempLerpVertex.GetPosition().z;
