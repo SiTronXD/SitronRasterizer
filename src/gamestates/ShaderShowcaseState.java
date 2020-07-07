@@ -37,10 +37,10 @@ public class ShaderShowcaseState extends GameState
 		
 		camera = new Camera();
 		
-		v1 = new Vertex(new Vector(-0.5f,  0.5f, 0.0f), new Vector(255, 0, 0), new Vector(0.0f, 0.0f));
-		v2 = new Vertex(new Vector(-0.5f, -0.5f, 0.0f), new Vector(0, 255, 0), new Vector(0.0f, 1.0f));
-		v3 = new Vertex(new Vector( 0.5f, -0.5f, 0.0f), new Vector(0, 0, 255), new Vector(1.0f, 1.0f));
-		v4 = new Vertex(new Vector( 0.5f,  0.5f, 0.0f), new Vector(255, 255, 0), new Vector(1.0f, 0.0f));
+		v1 = new Vertex(new Vector(-0.5f,  0.5f, 0.0f), new Vector(255, 0, 0), new Vector(0.0f, 0.0f), new Vector(0.0f, 0.0f, -1.0f));
+		v2 = new Vertex(new Vector(-0.5f, -0.5f, 0.0f), new Vector(0, 255, 0), new Vector(0.0f, 1.0f), new Vector(0.0f, 0.0f, -1.0f));
+		v3 = new Vertex(new Vector( 0.5f, -0.5f, 0.0f), new Vector(0, 0, 255), new Vector(1.0f, 1.0f), new Vector(0.0f, 0.0f, -1.0f));
+		v4 = new Vertex(new Vector( 0.5f,  0.5f, 0.0f), new Vector(255, 255, 0), new Vector(1.0f, 0.0f), new Vector(0.0f, 0.0f, -1.0f));
 		quadMesh = new Mesh(new Vertex[]{ v1, v2, v3, v4 }, new int[]{ 0, 1, 2, 0, 2, 3 });
 		
 		perspectiveTransform = Matrix.Perspective(

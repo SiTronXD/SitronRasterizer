@@ -83,9 +83,9 @@ public class Renderer {
 		if(normal.z >= 0.0) { return; }
 		
 		// NDC space --> screen space
-		transformedV1 = transformedV1.TransformToScreenSpace(m_width, m_height);
-		transformedV2 = transformedV2.TransformToScreenSpace(m_width, m_height);
-		transformedV3 = transformedV3.TransformToScreenSpace(m_width, m_height);
+		transformedV1.TransformToScreenSpace(m_width, m_height, transformedV1);
+		transformedV2.TransformToScreenSpace(m_width, m_height, transformedV2);
+		transformedV3.TransformToScreenSpace(m_width, m_height, transformedV3);
 
 		// Draw wireframe
 		if((renderFlags & RENDER_FLAGS_WIREFRAME) == RENDER_FLAGS_WIREFRAME)

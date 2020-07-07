@@ -27,6 +27,7 @@ public class OBJLoader {
 		ArrayList<Vertex> tempVertices = new ArrayList<Vertex>();
 		ArrayList<Integer> tempIndices = new ArrayList<Integer>();
 		ArrayList<Vector> tempTexCoords = new ArrayList<Vector>();
+		ArrayList<Vector> tempNormals = new ArrayList<Vector>(); 
 		
 		String st;
 		try {
@@ -48,7 +49,8 @@ public class OBJLoader {
 							Float.parseFloat(splitString[3])
 						),
 						new Vector(random.nextInt() % 255, random.nextInt() % 255, random.nextInt() % 255),
-						new Vector(random.nextFloat(), random.nextFloat())
+						new Vector(random.nextFloat(), random.nextFloat()),
+						new Vector(0.0f, 1.0f, 0.0f)
 					);
 					
 					tempVertices.add(v);
@@ -60,6 +62,17 @@ public class OBJLoader {
 						new Vector(
 							Float.parseFloat(splitString[1]), 
 							Float.parseFloat(splitString[2])
+						)
+					);
+				}
+				// Normals
+				else if(splitString[0].matches("vn"))
+				{
+					tempNormals.add(
+						new Vector(
+							Float.parseFloat(splitString[1]),
+							Float.parseFloat(splitString[2]),
+							Float.parseFloat(splitString[3])
 						)
 					);
 				}
@@ -79,12 +92,32 @@ public class OBJLoader {
 						String[] indicesSplitString = splitString[i].split("/");
 						
 						int vertIndex = Integer.parseInt(indicesSplitString[0])-1;
-						int texIndex = Integer.parseInt(indicesSplitString[1])-1;
-						
 						tempIndices.add(new Integer(vertIndex));
 						
-						// Set texture coordinates
-						tempVertices.get(vertIndex).m_texCoord.Set(tempTexCoords.get(texIndex).x, tempTexCoords.get(texIndex).y, 0.0f);
+						// Texture coordinates exists in the obj model
+						if(indicesSplitString.length >= 2)
+						{
+							int texIndex = Integer.parseInt(indicesSplitString[1])-1;
+							
+							// Set texture coordinates
+							tempVertices.get(vertIndex).m_texCoord.Set(
+								tempTexCoords.get(texIndex).x, 
+								tempTexCoords.get(texIndex).y, 
+								0.0f
+							);
+						}
+						// Normals exists in the obj model
+						if(indicesSplitString.length >= 3)
+						{
+							int normIndex = Integer.parseInt(indicesSplitString[2])-1;
+
+							// Set normals
+							tempVertices.get(vertIndex).m_normal.Set(
+								tempNormals.get(normIndex).x, 
+								tempNormals.get(normIndex).y, 
+								tempNormals.get(normIndex).z
+							);
+						}
 					}
 				}
 			}

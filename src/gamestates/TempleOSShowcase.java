@@ -1,5 +1,7 @@
 package gamestates;
 
+import java.util.Random;
+
 import com.sun.glass.events.KeyEvent;
 
 import engine.GameState;
@@ -9,6 +11,7 @@ import engine.Mesh;
 import engine.OBJLoader;
 import engine.Renderer;
 import engine.Texture;
+import engine.Vector;
 import engine.Vertex;
 import engine.Window;
 import engine.shaders.TempleOSShader;
@@ -19,6 +22,7 @@ public class TempleOSShowcase extends GameState
 	Camera camera;
 
 	Matrix perspectiveTransform;
+	Matrix meshModelTransform;
 	Matrix meshTransform;
 	
 	Vertex v1, v2, v3, v4;
@@ -27,6 +31,7 @@ public class TempleOSShowcase extends GameState
 	Mesh topMesh;
 	Mesh rightSideMesh;
 	Mesh leftSideMesh;
+	Mesh wholeModelMeshTest;
 	
 	Texture maskTexture;
 	
@@ -34,24 +39,34 @@ public class TempleOSShowcase extends GameState
 	boolean renderPerspectiveIncorrect = false;
 	int renderFlags = 0;
 	
+	float timer;
+	
 	@Override
 	public void Init() {
 		renderer.SetShader(new TempleOSShader());
 		
-		camera = new Camera();
+		camera = new Camera((float)Math.PI);
 		
 		// Load everything
 		OBJLoader objLoader = new OBJLoader("./res/gfx/TempleOSSword.obj");
 		swordMesh = new Mesh(objLoader);
+		swordMesh.RecalculateNormals();
 		
 		objLoader = new OBJLoader("./res/gfx/TempleOSTop.obj");
 		topMesh = new Mesh(objLoader);
+		topMesh.RecalculateNormals();
 
 		objLoader = new OBJLoader("./res/gfx/TempleOSRightSide.obj");
 		rightSideMesh = new Mesh(objLoader);
+		rightSideMesh.RecalculateNormals();
 
 		objLoader = new OBJLoader("./res/gfx/TempleOSLeftSide.obj");
 		leftSideMesh = new Mesh(objLoader);
+		leftSideMesh.RecalculateNormals();
+		
+		objLoader = new OBJLoader("./res/gfx/TempleOSWholeModel.obj");
+		wholeModelMeshTest = new Mesh(objLoader);
+		wholeModelMeshTest.RecalculateNormals();
 		
 		perspectiveTransform = Matrix.Perspective(
 				(float)window.getWidth() / (float)window.getHeight(), 
@@ -61,6 +76,12 @@ public class TempleOSShowcase extends GameState
 			);
 
 		maskTexture = new Texture("./res/gfx/WhiteBlackTexture.png");
+		
+		/*Random r = new Random();
+		for(int i = 0; i < swordMesh.GetVertices().length; i++)
+		{
+			swordMesh.GetVertices()[i].m_worldPosition.x = (int)(Math.abs(r.nextInt()))%255;
+		}*/
 	}
 
 	@Override
@@ -99,10 +120,15 @@ public class TempleOSShowcase extends GameState
 		camera.Rotate(h, v);
 		camera.Move(r, u, f);
 		
-		meshTransform = Matrix.Identity();
-		meshTransform = Matrix.MatMatMul(Matrix.RotateX((float) Math.PI/2.0f), meshTransform);
-		meshTransform = Matrix.MatMatMul(Matrix.Translate(0.0f, 0.0f, 1.6f), meshTransform);
-		meshTransform = Matrix.MatMatMul(camera.GetViewMat(), meshTransform);
+		//timer += dt;
+		
+		// Local space --> World space
+		meshModelTransform = Matrix.Identity();
+		meshModelTransform = Matrix.MatMatMul(Matrix.RotateX((float) Math.PI/2.0f), meshModelTransform);
+		meshModelTransform = Matrix.MatMatMul(Matrix.Translate((float) Math.sin(timer), 0.0f, -1.6f), meshModelTransform);
+		
+		// World space --> Clip space
+		meshTransform = Matrix.MatMatMul(camera.GetViewMat(), meshModelTransform);
 		meshTransform = Matrix.MatMatMul(perspectiveTransform, meshTransform);
 		
 		// Rot Y from above
@@ -135,14 +161,18 @@ public class TempleOSShowcase extends GameState
 		renderer.ClearDepthBuffer();
 		
 		// Update shader
+		renderer.GetShader().SetMatrix("ModelMatrix", meshModelTransform);
 		renderer.GetShader().SetMatrix("MVP", meshTransform);
 		renderer.GetShader().SetTexture("DiffuseTexture", maskTexture);
 		
 		// Render meshes
+		/*
 		swordMesh.Draw(renderer, renderFlags);
 		topMesh.Draw(renderer, renderFlags);
 		rightSideMesh.Draw(renderer, renderFlags);
 		leftSideMesh.Draw(renderer, renderFlags);
+		*/
+		wholeModelMeshTest.Draw(renderer, renderFlags);
 	}
 
 	public TempleOSShowcase(Window window, Renderer renderer, Input input) { super(window, renderer, input); }

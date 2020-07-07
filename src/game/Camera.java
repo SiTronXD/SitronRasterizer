@@ -21,6 +21,16 @@ public class Camera {
 		up = new Vector(0.0f, 1.0f, 0.0f);
 	}
 	
+	public Camera(float startYaw)
+	{
+		cameraPosition = new Vector(0.0f, 0.0f, 0.0f);
+		
+		forward = new Vector(0.0f, 0.0f, 1.0f);
+		up = new Vector(0.0f, 1.0f, 0.0f);
+		
+		this.yaw = startYaw;
+	}
+	
 	public void Move(float r, float u, float f)
 	{
 		// Forward
