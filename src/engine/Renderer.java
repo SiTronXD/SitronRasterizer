@@ -9,6 +9,7 @@ public class Renderer {
 	public static final int RENDER_FLAGS_NO_FLAGS = 0;
 	public static final int RENDER_FLAGS_WIREFRAME = 1;
 	public static final int RENDER_FLAGS_NON_PERSPECTIVE_CORRECT_INTERPOLATION = 2;
+	public static final int RENDER_FLAGS_DISABLE_BACK_FACE_CULLING = 4;
 	
 	int m_width;
 	int m_height;
@@ -75,12 +76,15 @@ public class Renderer {
 		transformedV1.GetPosition().Div(transformedV1.GetPosition().w, transformedV1.GetPosition().w, transformedV1.GetPosition().w, 1.0f);
 		transformedV2.GetPosition().Div(transformedV2.GetPosition().w, transformedV2.GetPosition().w, transformedV2.GetPosition().w, 1.0f);
 		transformedV3.GetPosition().Div(transformedV3.GetPosition().w, transformedV3.GetPosition().w, transformedV3.GetPosition().w, 1.0f);
-		
+
 		// Back-face culling
-		Vector edge0 = new Vector(transformedV2.GetPosition()); edge0.Sub(transformedV1.GetPosition());
-		Vector edge1 = new Vector(transformedV3.GetPosition()); edge1.Sub(transformedV1.GetPosition());
-		Vector normal = Vector.Cross(edge0, edge1);
-		if(normal.z >= 0.0) { return; }
+		if((renderFlags & RENDER_FLAGS_DISABLE_BACK_FACE_CULLING) != RENDER_FLAGS_DISABLE_BACK_FACE_CULLING)
+		{
+			Vector edge0 = new Vector(transformedV2.GetPosition()); edge0.Sub(transformedV1.GetPosition());
+			Vector edge1 = new Vector(transformedV3.GetPosition()); edge1.Sub(transformedV1.GetPosition());
+			Vector normal = Vector.Cross(edge0, edge1);
+			if(normal.z >= 0.0) { return; }
+		}
 		
 		// NDC space --> screen space
 		transformedV1.TransformToScreenSpace(m_width, m_height, transformedV1);

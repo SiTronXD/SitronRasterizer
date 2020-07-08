@@ -26,8 +26,6 @@ public class Vertex {
 		m_normal = normal;
 
 		m_worldPosition = new Vector(0.0f, 0.0f, 0.0f);
-		
-		System.out.println("pee pee poo poo");
 	}
 	
 	public Vertex(Vertex oldVertex)

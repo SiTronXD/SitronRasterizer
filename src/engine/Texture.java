@@ -105,10 +105,9 @@ public class Texture {
 		ny = SMath.Clamp(ny, 0.0f, 1.0f);
 		
 		// Use coordinates to find index in m_colorChannels
-		int realX = (int)(nx * m_width);
-		int realY = (int)(ny * m_height);
+		int realX = (int)(nx * (m_width-1));
+		int realY = (int)(ny * (m_height-1));
 		int imageIndex = realX + realY * m_width;
-		imageIndex = Math.min(m_width * m_height - 1, imageIndex);
 		
 		// Create vector with colors
 		newInfoVector.x = m_colorChannels[imageIndex * NUM_COLOR_CHANNELS + 0] & 0xFF;
@@ -124,10 +123,9 @@ public class Texture {
 		ny = SMath.Clamp(ny, 0.0f, 1.0f);
 		
 		// Use coordinates to find index in m_colorChannels
-		int realX = (int)(nx * m_width);
-		int realY = (int)(ny * m_height);
+		int realX = (int)(nx * (m_width-1));
+		int realY = (int)(ny * (m_height-1));
 		int imageIndex = realX + realY * m_width;
-		imageIndex = Math.min(m_width * m_height - 1, imageIndex);
 		
 		// Create vector with colors
 		newInfoVector.byte_x = m_colorChannels[imageIndex * NUM_COLOR_CHANNELS + 0];

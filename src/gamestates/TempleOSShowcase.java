@@ -1,7 +1,5 @@
 package gamestates;
 
-import java.util.Random;
-
 import com.sun.glass.events.KeyEvent;
 
 import engine.GameState;
@@ -10,11 +8,13 @@ import engine.Matrix;
 import engine.Mesh;
 import engine.OBJLoader;
 import engine.Renderer;
+import engine.Shader;
 import engine.Texture;
-import engine.Vector;
 import engine.Vertex;
 import engine.Window;
+import engine.shaders.DefaultShader;
 import engine.shaders.TempleOSShader;
+import game.Bird;
 import game.Camera;
 
 public class TempleOSShowcase extends GameState 
@@ -23,7 +23,7 @@ public class TempleOSShowcase extends GameState
 
 	Matrix perspectiveTransform;
 	Matrix meshModelTransform;
-	Matrix meshTransform;
+	Matrix vpMatrixTransform;
 	
 	Vertex v1, v2, v3, v4;
 	
@@ -32,6 +32,8 @@ public class TempleOSShowcase extends GameState
 	Mesh rightSideMesh;
 	Mesh leftSideMesh;
 	Mesh wholeModelMeshTest;
+	
+	Bird testBird;
 	
 	Texture maskTexture;
 	Texture shadowTexture;
@@ -42,9 +44,13 @@ public class TempleOSShowcase extends GameState
 	
 	float timer;
 	
+	Shader templeOSShader;
+	Shader defaultShader;
+	
 	@Override
 	public void Init() {
-		renderer.SetShader(new TempleOSShader());
+		templeOSShader = new TempleOSShader();
+		defaultShader = new DefaultShader();
 		
 		camera = new Camera();
 		
@@ -68,6 +74,8 @@ public class TempleOSShowcase extends GameState
 		objLoader = new OBJLoader("./res/gfx/TempleOSWholeModel.obj");
 		wholeModelMeshTest = new Mesh(objLoader);
 		wholeModelMeshTest.RecalculateNormals();
+		
+		testBird = new Bird();
 		
 		perspectiveTransform = Matrix.Perspective(
 				(float)window.getWidth() / (float)window.getHeight(), 
@@ -130,8 +138,8 @@ public class TempleOSShowcase extends GameState
 		meshModelTransform = Matrix.MatMatMul(Matrix.Translate((float) Math.sin(timer), 0.0f, 1.6f), meshModelTransform);
 		
 		// World space --> Clip space
-		meshTransform = Matrix.MatMatMul(camera.GetViewMat(), meshModelTransform);
-		meshTransform = Matrix.MatMatMul(perspectiveTransform, meshTransform);
+		vpMatrixTransform = camera.GetViewMat();
+		vpMatrixTransform = Matrix.MatMatMul(perspectiveTransform, vpMatrixTransform);
 		
 		// Rot Y from above
 		/*
@@ -154,6 +162,8 @@ public class TempleOSShowcase extends GameState
 			renderFlags |= Renderer.RENDER_FLAGS_WIREFRAME;
 		if(renderPerspectiveIncorrect)
 			renderFlags |= Renderer.RENDER_FLAGS_NON_PERSPECTIVE_CORRECT_INTERPOLATION;
+		
+		testBird.Update(dt);
 	}
 
 	@Override
@@ -163,16 +173,24 @@ public class TempleOSShowcase extends GameState
 		renderer.ClearDepthBuffer();
 		
 		// Update shader
+		renderer.SetShader(templeOSShader);
 		renderer.GetShader().SetMatrix("ModelMatrix", meshModelTransform);
-		renderer.GetShader().SetMatrix("MVP", meshTransform);
+		renderer.GetShader().SetMatrix("MVP", Matrix.MatMatMul(vpMatrixTransform, meshModelTransform));
 		renderer.GetShader().SetTexture("DiffuseTexture", maskTexture);
 		renderer.GetShader().SetTexture("ShadowTexture", shadowTexture);
 		
 		// Render meshes
+		/*
 		swordMesh.Draw(renderer, renderFlags);
 		topMesh.Draw(renderer, renderFlags);
 		rightSideMesh.Draw(renderer, renderFlags);
 		leftSideMesh.Draw(renderer, renderFlags);
+		*/
+		
+		// Update shader
+		renderer.SetShader(defaultShader);
+		renderer.GetShader().SetTexture("DiffuseTexture", maskTexture);
+		testBird.Draw(vpMatrixTransform, renderer, renderFlags);
 	}
 
 	public TempleOSShowcase(Window window, Renderer renderer, Input input) { super(window, renderer, input); }
