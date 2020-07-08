@@ -49,6 +49,14 @@ public class Vector {
 		byte_w = byte_w_pos;
 	}
 	
+	public void Add(float a)
+	{
+		x += a;
+		y += a;
+		z += a;
+		w += a;
+	}
+	
 	public void Add(Vector v)
 	{
 		x += v.x;
@@ -73,12 +81,12 @@ public class Vector {
 		w *= s;
 	}
 	
-	public void Scale(float xs, float ys, float zs, float ws)
+	public void Scale(Vector v)
 	{
-		x *= xs;
-		y *= ys;
-		z *= zs;
-		w *= ws;
+		x *= v.x;
+		y *= v.y;
+		z *= v.z;
+		w *= v.w;
 	}
 	
 	public void Div(float xd, float yd, float zd, float wd)

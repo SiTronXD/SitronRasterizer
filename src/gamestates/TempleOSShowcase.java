@@ -34,6 +34,7 @@ public class TempleOSShowcase extends GameState
 	Mesh wholeModelMeshTest;
 	
 	Texture maskTexture;
+	Texture shadowTexture;
 	
 	boolean renderWireframe = false;
 	boolean renderPerspectiveIncorrect = false;
@@ -45,7 +46,7 @@ public class TempleOSShowcase extends GameState
 	public void Init() {
 		renderer.SetShader(new TempleOSShader());
 		
-		camera = new Camera((float)Math.PI);
+		camera = new Camera();
 		
 		// Load everything
 		OBJLoader objLoader = new OBJLoader("./res/gfx/TempleOSSword.obj");
@@ -76,6 +77,7 @@ public class TempleOSShowcase extends GameState
 			);
 
 		maskTexture = new Texture("./res/gfx/WhiteBlackTexture.png");
+		shadowTexture = new Texture("./res/gfx/ShadowTexture.png");
 		
 		/*Random r = new Random();
 		for(int i = 0; i < swordMesh.GetVertices().length; i++)
@@ -125,7 +127,7 @@ public class TempleOSShowcase extends GameState
 		// Local space --> World space
 		meshModelTransform = Matrix.Identity();
 		meshModelTransform = Matrix.MatMatMul(Matrix.RotateX((float) Math.PI/2.0f), meshModelTransform);
-		meshModelTransform = Matrix.MatMatMul(Matrix.Translate((float) Math.sin(timer), 0.0f, -1.6f), meshModelTransform);
+		meshModelTransform = Matrix.MatMatMul(Matrix.Translate((float) Math.sin(timer), 0.0f, 1.6f), meshModelTransform);
 		
 		// World space --> Clip space
 		meshTransform = Matrix.MatMatMul(camera.GetViewMat(), meshModelTransform);
@@ -164,15 +166,13 @@ public class TempleOSShowcase extends GameState
 		renderer.GetShader().SetMatrix("ModelMatrix", meshModelTransform);
 		renderer.GetShader().SetMatrix("MVP", meshTransform);
 		renderer.GetShader().SetTexture("DiffuseTexture", maskTexture);
+		renderer.GetShader().SetTexture("ShadowTexture", shadowTexture);
 		
 		// Render meshes
-		/*
 		swordMesh.Draw(renderer, renderFlags);
 		topMesh.Draw(renderer, renderFlags);
 		rightSideMesh.Draw(renderer, renderFlags);
 		leftSideMesh.Draw(renderer, renderFlags);
-		*/
-		wholeModelMeshTest.Draw(renderer, renderFlags);
 	}
 
 	public TempleOSShowcase(Window window, Renderer renderer, Input input) { super(window, renderer, input); }

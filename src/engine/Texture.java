@@ -111,10 +111,10 @@ public class Texture {
 		imageIndex = Math.min(m_width * m_height - 1, imageIndex);
 		
 		// Create vector with colors
-		newInfoVector.x = m_colorChannels[imageIndex * NUM_COLOR_CHANNELS + 0];
-		newInfoVector.y = m_colorChannels[imageIndex * NUM_COLOR_CHANNELS + 1];
-		newInfoVector.z = m_colorChannels[imageIndex * NUM_COLOR_CHANNELS + 2];
-		newInfoVector.w = m_colorChannels[imageIndex * NUM_COLOR_CHANNELS + 3];
+		newInfoVector.x = m_colorChannels[imageIndex * NUM_COLOR_CHANNELS + 0] & 0xFF;
+		newInfoVector.y = m_colorChannels[imageIndex * NUM_COLOR_CHANNELS + 1] & 0xFF;
+		newInfoVector.z = m_colorChannels[imageIndex * NUM_COLOR_CHANNELS + 2] & 0xFF;
+		newInfoVector.w = m_colorChannels[imageIndex * NUM_COLOR_CHANNELS + 3] & 0xFF;
 	}
 	
 	public void SampleColorByte(float nx, float ny, Vector newInfoVector)
