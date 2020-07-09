@@ -82,6 +82,19 @@ public class Matrix {
 		return tm;
 	}
 	
+	// Scale matrix
+	public static Matrix Scale(float xs, float ys, float zs)
+	{
+		Matrix tm = new Matrix();
+		
+		tm.m[0][0] = xs;		tm.m[0][1] = 0.0f;		tm.m[0][2] = 0.0f;		tm.m[0][3] = 0.0f;
+		tm.m[1][0] = 0.0f;		tm.m[1][1] = ys;		tm.m[1][2] = 0.0f;		tm.m[1][3] = 0.0f;
+		tm.m[2][0] = 0.0f;		tm.m[2][1] = 0.0f;		tm.m[2][2] = zs;		tm.m[2][3] = 0.0f;
+		tm.m[3][0] = 0.0f;		tm.m[3][1] = 0.0f;		tm.m[3][2] = 0.0f;		tm.m[3][3] = 1.0f;
+		
+		return tm;
+	}
+	
 	// View matrix
 	public static Matrix View(Vector position, Vector forward, Vector worldUp)
 	{

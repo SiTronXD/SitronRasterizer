@@ -22,6 +22,7 @@ public class TempleOSShader extends Shader
 		out_vec.Set(newPos);
 	}
 	
+	// Keep only the decimals of each component in the vector
 	void Fract(Vector fVec)
 	{
 		fVec.x = (float)(fVec.x - Math.floor(fVec.x));
@@ -56,13 +57,15 @@ public class TempleOSShader extends Shader
 		Vector regularColor = new Vector();
 		Vector shadowColor = new Vector();
 		
+		// Sample regular color and shadow color
 		diffuseTexture.SampleColor(texCoords.x, texCoords.y, regularColor);
 		shadowTexture.SampleColor(texCoords.x, texCoords.y, shadowColor);
 		
-		//out_col.byte_x = (byte)0xFD;
-		//out_col.byte_y = (byte)0xF6;
-		//out_col.byte_z = (byte)0x5A;
 		
+		// They noise is static when flooring the position
+		//Vector screenPos = new Vector((int) in_vert.m_position.x, (int) in_vert.m_position.y, 1.0f, 1.0f);
+		
+		// By not flooring the position, the shader looks more like the original animation
 		Vector screenPos = new Vector(in_vert.m_position.x, in_vert.m_position.y, 1.0f, 1.0f);
 		Vector r = GetPseudoRandomColor(screenPos);
 		
@@ -73,22 +76,26 @@ public class TempleOSShader extends Shader
 		Vector.Normalize(normal);
 		
 		// Light
-		Vector lightDir = new Vector(-3, 0.5f, 0);
+		Vector lightDir = new Vector(-3, 0.5f, -1.6f);
 		lightDir.Sub(in_vert.m_worldPosition);
 		//lightDir.Scale(-1);
 		Vector.Normalize(lightDir);
+		
 		float lambertLight = Vector.Dot(normal, lightDir);
 		lambertLight = SMath.Clamp(lambertLight, 0.0f, 1.0f);
+		
+		// By not making the shade too "extreme", the noise is destributed even on fully lit or non-lit surfaces
 		float squish = 0.60f;
 		lambertLight *= squish;
 		lambertLight += (1.0f - squish)/2.0f;
 		
+		// Regular color or shadow color
 		if(lambertLight*lambertLight < r.x)
 			out_col.Set(shadowColor);
 		else
 			out_col.Set(regularColor);
 		
-		// Final color
+		// Final color in bytes
 		out_col.SetByteValsToFloatVals();
 	}
 }
