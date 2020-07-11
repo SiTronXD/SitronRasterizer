@@ -27,6 +27,10 @@ public class Renderer {
 	int yMin;// = 0;
 	int yMax;// = 0;
 	
+	ArrayList<Vertex> vertices;
+	ArrayList<Vertex> verticesToCheck;
+	ArrayList<Vertex> currentSetOfVertices;
+	
 	public Renderer(int width, int height)
 	{
 		m_width = width;
@@ -53,49 +57,154 @@ public class Renderer {
 			xMinVert[i] = new Vertex();
 			xMaxVert[i] = new Vertex();
 		}
+		
+		vertices = new ArrayList<Vertex>();
+		verticesToCheck = new ArrayList<Vertex>();
+		currentSetOfVertices = new ArrayList<Vertex>();
 	}
 	
 	public void DrawTriangle(Vertex v1, Vertex v2, Vertex v3, int renderFlags)
 	{
-		Vertex transformedV1 = new Vertex(v1);
-		Vertex transformedV2 = new Vertex(v2);
-		Vertex transformedV3 = new Vertex(v3);
-
+		Vertex[] oldVertices = new Vertex[]{ v1, v2, v3 };
+		
+		vertices.clear();
+		vertices.add(new Vertex(oldVertices[0]));
+		vertices.add(new Vertex(oldVertices[1]));
+		vertices.add(new Vertex(oldVertices[2]));
+		
 		// Local space --> Clip space
-		m_shader.VertexShader(v1, transformedV1.m_position);
-		m_shader.VertexShader(v2, transformedV2.m_position);
-		m_shader.VertexShader(v3, transformedV3.m_position);
+		for(int i = 0; i < vertices.size(); i++)
+			m_shader.VertexShader(oldVertices[i], vertices.get(i).m_position);
 
-		// Frustum culling
-		if(!(Vertex.IsInsideViewFrustum(transformedV1.GetPosition()) && 
-			 Vertex.IsInsideViewFrustum(transformedV2.GetPosition()) && 
-			 Vertex.IsInsideViewFrustum(transformedV3.GetPosition())))
+		// Clipping
+		GetVerticesAfterClipping();
+		if(vertices.size() <= 0)
 			return;
 		
 		// Perspective divide
-		transformedV1.GetPosition().Div(transformedV1.GetPosition().w, transformedV1.GetPosition().w, transformedV1.GetPosition().w, 1.0f);
-		transformedV2.GetPosition().Div(transformedV2.GetPosition().w, transformedV2.GetPosition().w, transformedV2.GetPosition().w, 1.0f);
-		transformedV3.GetPosition().Div(transformedV3.GetPosition().w, transformedV3.GetPosition().w, transformedV3.GetPosition().w, 1.0f);
-
+		for(int i = 0; i < vertices.size(); i++)
+		{
+			float w = vertices.get(i).GetPosition().w;
+			vertices.get(i).GetPosition().Div(w, w, w, 1.0f);
+		}
+		
 		// Back-face culling
 		if((renderFlags & RENDER_FLAGS_DISABLE_BACK_FACE_CULLING) != RENDER_FLAGS_DISABLE_BACK_FACE_CULLING)
 		{
-			Vector edge0 = new Vector(transformedV2.GetPosition()); edge0.Sub(transformedV1.GetPosition());
-			Vector edge1 = new Vector(transformedV3.GetPosition()); edge1.Sub(transformedV1.GetPosition());
+			// Since all triangles after clipping lay on the same plane, we only need to check one single normal
+			Vector edge0 = new Vector(vertices.get(1).GetPosition()); edge0.Sub(vertices.get(0).GetPosition());
+			Vector edge1 = new Vector(vertices.get(2).GetPosition()); edge1.Sub(vertices.get(0).GetPosition());
 			Vector normal = Vector.Cross(edge0, edge1);
 			if(normal.z >= 0.0) { return; }
 		}
 		
 		// NDC space --> screen space
-		transformedV1.TransformToScreenSpace(m_width, m_height, transformedV1);
-		transformedV2.TransformToScreenSpace(m_width, m_height, transformedV2);
-		transformedV3.TransformToScreenSpace(m_width, m_height, transformedV3);
+		for(int i = 0; i < vertices.size(); i++)
+		{
+			vertices.get(i).TransformToScreenSpace(m_width, m_height, vertices.get(i));
+		}
 
-		// Draw wireframe
-		if((renderFlags & RENDER_FLAGS_WIREFRAME) == RENDER_FLAGS_WIREFRAME)
-			DrawNonFilledTriangleOnScreen(transformedV1, transformedV2, transformedV3);
-		else
-			FillTriangleOnScreen(transformedV1, transformedV2, transformedV3, renderFlags);
+		for(int i = 0; i < vertices.size()-2; i++)
+		{
+			// Draw wireframe
+			if((renderFlags & RENDER_FLAGS_WIREFRAME) == RENDER_FLAGS_WIREFRAME)
+				DrawNonFilledTriangleOnScreen(vertices.get(0), vertices.get(i+1), vertices.get(i+2));
+			else
+				FillTriangleOnScreen(vertices.get(0), vertices.get(i+1), vertices.get(i+2), renderFlags);
+		}
+	}
+	
+	// Clipping algorithm was heavily inspired by Fabien Sanglard's article on homogeneous clipping
+	void GetVerticesAfterClipping()
+	{
+		boolean v1InVF = Vertex.IsInsideViewFrustum(vertices.get(0).m_position);
+		boolean v2InVF = Vertex.IsInsideViewFrustum(vertices.get(1).m_position);
+		boolean v3InVF = Vertex.IsInsideViewFrustum(vertices.get(2).m_position); 
+		
+		// Ignore if all vertices are inside view frustum
+		if(v1InVF && v2InVF && v3InVF)
+		{
+			return;
+		}
+		// I choose to not return here, since the triangle could potentially cover the screen even when the 
+		// vertices are outside the window's opposite sides. The triangle should still be rendered in that case.
+		/*else if(!v1InVF && !v2InVF && !v3InVF)
+		{
+			vertices.clear();
+			return;
+		}*/
+			
+		verticesToCheck.clear();
+		verticesToCheck.add(vertices.get(0));
+		verticesToCheck.add(vertices.get(1));
+		verticesToCheck.add(vertices.get(2));
+		
+		
+		for(int checkAxis = 0; checkAxis < 6; checkAxis++)
+		{
+			if(verticesToCheck.size() <= 0)
+				break;
+			
+			currentSetOfVertices.clear();
+			
+			// Last vertex
+			Vertex lastVertex = verticesToCheck.get(verticesToCheck.size()-1);
+			boolean lastInVF = Vertex.IsInsideViewAxis(lastVertex.GetPosition(), checkAxis);
+			
+			// Go through each vertex in each "line"
+			for(int i = 0; i < verticesToCheck.size(); i++)
+			{
+				Vertex currentVertex = verticesToCheck.get(i);
+				boolean currentInVF = Vertex.IsInsideViewAxis(currentVertex.GetPosition(), checkAxis);
+				
+				// One of the vertices are outside
+				if(currentInVF ^ lastInVF)
+				{
+					int componentIndex = (int)(checkAxis/2.0f);
+					float wScalar = (checkAxis == 5) ? 0.0f : 1.0f;
+					Vertex insideVertex = currentInVF ? currentVertex : lastVertex;
+					Vertex outsideVertex = !currentInVF ? currentVertex : lastVertex;
+					Vertex createdVert = GetNewClippedVertex(insideVertex, outsideVertex, componentIndex, wScalar);
+					
+					currentSetOfVertices.add(createdVert);
+				}
+				// This vertex is inside
+				if(currentInVF)
+				{
+					currentSetOfVertices.add(currentVertex);
+				}
+				
+				lastVertex = currentVertex;
+				lastInVF = currentInVF;
+			}
+			
+			// Start over with current vertices
+			verticesToCheck.clear();
+			for(int i = 0; i < currentSetOfVertices.size(); i++)
+				verticesToCheck.add(currentSetOfVertices.get(i));
+		}
+		
+		// Done
+		vertices.clear();
+		for(int i = 0; i < verticesToCheck.size(); i++)
+		{
+			vertices.add(verticesToCheck.get(i));
+		}
+	}
+	
+	Vertex GetNewClippedVertex(Vertex vertA, Vertex vertB, int componentIndex, float wScalar)
+	{
+		float differenceA = (vertA.m_position.w * Math.signum(vertB.m_position.GetComponent(componentIndex)) * wScalar) - vertA.m_position.GetComponent(componentIndex); 
+		float differenceB = (vertB.m_position.w * Math.signum(vertB.m_position.GetComponent(componentIndex)) * wScalar) - vertB.m_position.GetComponent(componentIndex);
+		
+		// Find t-value on line
+		float t = differenceA / (differenceA - differenceB);
+		
+		// Create vertex
+		Vertex newVert = new Vertex();
+		Vertex.Lerp(vertA, vertB, t, newVert);
+		
+		return newVert;
 	}
 	
 	public void FillTriangleOnScreen(Vertex v1, Vertex v2, Vertex v3, int renderFlags)
@@ -322,6 +431,7 @@ public class Renderer {
 		return storedPoints;
 	}
 	
+	// Resets bounds before drawing a new triangle
 	void ResetMinMaxBounds()
 	{
 		// Set extreme initial boundaries for min and max
@@ -330,7 +440,8 @@ public class Renderer {
 		for(int i = 0; i < xMax.length; i++)
 			xMax[i] = -1;
 	}
-	
+
+	// Sets bounds for one triangle edge
 	void SetMinMaxLineBounds(ArrayList<Vector> line, Vertex v1, Vertex v2, boolean lerpPerspCorrect)
 	{
 		for(int i = 0; i < line.size(); i++)
@@ -399,11 +510,13 @@ public class Renderer {
 		return new Vertex[] { v1, v2, v3 };
 	}
 	
+	// Clear render texture using a color
 	public void ClearRenderTexture(byte red, byte green, byte blue)
 	{
 		m_renderTexture.SetToColor(red, green, blue);
 	}
 	
+	// Clear depth buffer to 1
 	public void ClearDepthBuffer()
 	{
 		for(int i = 0; i < m_depthBuffer.length; i++)
@@ -412,11 +525,13 @@ public class Renderer {
 		}
 	}
 	
+	// Updates shader
 	public void Update(float dt)
 	{
 		m_shader.Update(dt);
 	}
 	
+	// Sets current shader
 	public void SetShader(Shader newShader)
 	{
 		m_shader = newShader;

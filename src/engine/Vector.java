@@ -203,5 +203,23 @@ public class Vector {
 		byte_w = (byte) w; 
 	}
 	
+	public float GetComponent(int componentIndex)
+	{
+		switch(componentIndex)
+		{
+		case 0:
+			return x;
+		case 1:
+			return y;
+		case 2:
+			return z;
+		case 3:
+			return w;
+		default:
+			System.out.println("INCORRECT COMPONENT INDEX IN GetComponent(): " + componentIndex);
+			return 0.0f;
+		}
+	}
+	
 	public String GetString() { return "x: " + x + "  y: " + y + "  z: " + z + "  w: " + w; }
 }

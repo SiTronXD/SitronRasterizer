@@ -46,7 +46,7 @@ public class OBJModelShowcaseState extends GameState
 				100.0f
 			);
 
-		testTexture = new Texture("./res/gfx/howBoutYallFellas.png");
+		testTexture = new Texture("./res/gfx/ThatsPoggersBro.png");
 	}
 
 	@Override

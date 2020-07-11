@@ -41,8 +41,8 @@ public class Vertex {
 	public void TransformToScreenSpace(float width, float height, Vertex oldVertex)
 	{
 		Vector newPos = new Vector(
-			(m_position.x * 0.5f + 0.5f) * width,
-			(-m_position.y * 0.5f + 0.5f) * height, // Invert Y
+			(m_position.x * 0.5f + 0.5f) * (width-1),
+			(-m_position.y * 0.5f + 0.5f) * (height-1), // Invert Y
 			m_position.z,
 			m_position.w
 		);
@@ -55,6 +55,28 @@ public class Vertex {
 		return 	Math.abs(transformedVertexPosition.x) <= Math.abs(transformedVertexPosition.w) && 
 				Math.abs(transformedVertexPosition.y) <= Math.abs(transformedVertexPosition.w) &&
 				transformedVertexPosition.z <= transformedVertexPosition.w && transformedVertexPosition.z >= 0.0f;
+	}
+	
+	public static boolean IsInsideViewAxis(Vector transformedVertexPosition, int checkAxis)
+	{
+		int component = (int)(checkAxis/2.0f);
+		boolean checkPositive = checkAxis % 2 == 0;
+		
+		// Compare component to w-value as you would expect
+		if(checkAxis < 2*2+1) // component * side 
+		{
+			if(checkPositive)
+				return transformedVertexPosition.GetComponent(component) <= transformedVertexPosition.w;
+			else
+				return transformedVertexPosition.GetComponent(component) >= -transformedVertexPosition.w;
+		}
+		// Compare z-value to 0
+		else if(checkAxis == 5)
+		{
+			return transformedVertexPosition.GetComponent(component) >= 0.0f;
+		}
+		
+		return true;
 	}
 	
 	public static void Lerp(Vertex v1, Vertex v2, float t, Vertex newInfoVertex)
