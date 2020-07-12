@@ -126,13 +126,13 @@ public class Renderer {
 		{
 			return;
 		}
-		// I choose to not return here, since the triangle could potentially cover the screen even when the 
+		// This is the greatest flaw of the algorithm, since the triangle could potentially cover the screen even when the 
 		// vertices are outside the window's opposite sides. The triangle should still be rendered in that case.
-		/*else if(!v1InVF && !v2InVF && !v3InVF)
+		else if(!v1InVF && !v2InVF && !v3InVF)
 		{
 			vertices.clear();
 			return;
-		}*/
+		}
 			
 		verticesToCheck.clear();
 		verticesToCheck.add(vertices.get(0));
@@ -240,6 +240,10 @@ public class Renderer {
 		);
 		yMin = (int) firstLine.get(0).y;
 		yMax = (int) thirdLine.get(thirdLine.size()-1).y;
+		
+		// Clamp just to make sure the values are valid
+		yMin = (int) SMath.Clamp(yMin, 0.0f, m_height-1);
+		yMax = (int) SMath.Clamp(yMax, 0.0f, m_height-1);
 		
 		SetMinMaxLineBounds(firstLine, v1, v2, lerpPerspCorrect);
 		SetMinMaxLineBounds(secondLine, v1, v3, lerpPerspCorrect);
@@ -441,13 +445,17 @@ public class Renderer {
 			xMax[i] = -1;
 	}
 
-	// Sets bounds for one triangle edge
+	// Sets horizontal bounds for one triangle edge
 	void SetMinMaxLineBounds(ArrayList<Vector> line, Vertex v1, Vertex v2, boolean lerpPerspCorrect)
 	{
 		for(int i = 0; i < line.size(); i++)
 		{
 			int curr_x = (int) line.get(i).x;
 			int curr_y = (int) line.get(i).y;
+
+			// Clamp just to make sure the values are valid
+			curr_x = (int) SMath.Clamp(curr_x, 0.0f, m_width-1);
+			curr_y = (int) SMath.Clamp(curr_y, 0.0f, m_height-1);
 			
 			if(curr_x < xMin[curr_y])
 			{

@@ -13,4 +13,16 @@ public class SMath {
 		
 		return val;
 	}
+	
+	// Sine as float
+	public static float Sin(float angle)
+	{
+		return (float)Math.sin(angle);
+	}
+	
+	// Cosine as float
+	public static float Cos(float angle)
+	{
+		return (float)Math.cos(angle);
+	}
 }

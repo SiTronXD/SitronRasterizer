@@ -17,8 +17,8 @@ public class Main {
 	// 1: Default quad mesh with "custom shader"
 	// 2: Model of monkey head
 	// 3: Model of monkey head with "custom shader"
-	// 4: Epicly!!! :^)
-	public static final int CURRENT_STATE = 0;
+	// 4: TempleOS example scene
+	public static final int CURRENT_STATE = 4;
 	
 	static int screenWidth = 1280;
 	static int screenHeight = 720;

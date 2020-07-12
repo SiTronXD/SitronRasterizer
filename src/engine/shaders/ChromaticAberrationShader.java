@@ -5,6 +5,7 @@ import engine.Shader;
 import engine.Texture;
 import engine.Vector;
 import engine.Vertex;
+import static engine.SMath.*;
 
 public class ChromaticAberrationShader extends Shader 
 {
@@ -24,27 +25,20 @@ public class ChromaticAberrationShader extends Shader
 		
 		// Calculate offset
 		Vector offset = new Vector(0.02f, 0.02f);
-		offset.x *= Math.sin(-GetTime() * 3.0f);
-		offset.y *= Math.cos(-GetTime() * 3.0f);
+		offset.x *= Sin(-GetTime() * 3.0f);
+		offset.y *= Cos(-GetTime() * 3.0f);
 		
-		Vector col0 = new Vector();
-		Vector col1 = new Vector();
-		Vector col2 = new Vector();
+		Vector tempSampleCol = new Vector();
 
-		// Sample from different offsets
-		texture.SampleColor(texCoords.x, texCoords.y, col0);
-		texture.SampleColor(texCoords.x + offset.x, texCoords.y + offset.y, col1);
-		texture.SampleColor(texCoords.x - offset.x, texCoords.y - offset.y, col2);
+		// Sample and add from textures with different offsets to the uvs
+		texture.SampleColor(texCoords.x, texCoords.y, tempSampleCol);
+		out_col.Add(tempSampleCol.x, 0.0f, 0.0f, 0.0f); // Add red
 		
-		// Cancel out all except one channel from each sampled color
-		col0.y = 0.0f; col0.z = 0.0f;
-		col1.x = 0.0f; col1.z = 0.0f;
-		col2.x = 0.0f; col2.y = 0.0f;
+		texture.SampleColor(texCoords.x + offset.x, texCoords.y + offset.y, tempSampleCol);
+		out_col.Add(0.0f, tempSampleCol.y, 0.0f, 0.0f); // Add green
 		
-		// Add them to the final color
-		out_col.Add(col0);
-		out_col.Add(col1);
-		out_col.Add(col2);
+		texture.SampleColor(texCoords.x - offset.x, texCoords.y - offset.y, tempSampleCol);
+		out_col.Add(0.0f, 0.0f, tempSampleCol.z, 0.0f); // Add blue
 		
 		// Set byte valus to float values
 		out_col.SetByteValsToFloatVals();

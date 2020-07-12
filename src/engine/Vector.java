@@ -57,6 +57,14 @@ public class Vector {
 		w += a;
 	}
 	
+	public void Add(float xa, float ya, float za, float wa)
+	{
+		x += xa;
+		y += ya;
+		z += za;
+		w += wa;
+	}
+	
 	public void Add(Vector v)
 	{
 		x += v.x;

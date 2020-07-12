@@ -31,6 +31,7 @@ public class TempleOSShader extends Shader
 		fVec.w = (float)(fVec.w - Math.floor(fVec.w));
 	}
 	
+	// Got this method from Youtuber "The Art of Code"
 	Vector GetPseudoRandomColor(Vector n)
 	{
 		Vector newCol = new Vector(n);
@@ -62,12 +63,12 @@ public class TempleOSShader extends Shader
 		shadowTexture.SampleColor(texCoords.x, texCoords.y, shadowColor);
 		
 		
-		// They noise is static when flooring the position
+		// The noise is static when flooring the position
 		//Vector screenPos = new Vector((int) in_vert.m_position.x, (int) in_vert.m_position.y, 1.0f, 1.0f);
 		
 		// By not flooring the position, the shader looks more like the original animation
 		Vector screenPos = new Vector(in_vert.m_position.x, in_vert.m_position.y, 1.0f, 1.0f);
-		Vector r = GetPseudoRandomColor(screenPos);
+		Vector randomCol = GetPseudoRandomColor(screenPos);
 		
 		// Transform normal to world space
 		Vector normal = in_vert.m_normal;
@@ -78,7 +79,6 @@ public class TempleOSShader extends Shader
 		// Light
 		Vector lightDir = new Vector(-3, 0.5f, -1.6f);
 		lightDir.Sub(in_vert.m_worldPosition);
-		//lightDir.Scale(-1);
 		Vector.Normalize(lightDir);
 		
 		float lambertLight = Vector.Dot(normal, lightDir);
@@ -90,7 +90,7 @@ public class TempleOSShader extends Shader
 		lambertLight += (1.0f - squish)/2.0f;
 		
 		// Regular color or shadow color
-		if(lambertLight*lambertLight < r.x)
+		if(lambertLight*lambertLight < randomCol.x)
 			out_col.Set(shadowColor);
 		else
 			out_col.Set(regularColor);
