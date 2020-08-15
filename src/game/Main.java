@@ -7,6 +7,7 @@ import engine.Input;
 import engine.Renderer;
 import engine.Window;
 import gamestates.DefaultQuadShowcaseState;
+import gamestates.GerstnerWavesShowcaseState;
 import gamestates.OBJModelShaderShowcaseState;
 import gamestates.OBJModelShowcaseState;
 import gamestates.ShaderShowcaseState;
@@ -17,7 +18,8 @@ public class Main {
 	// 1: Default quad mesh with "custom shader"
 	// 2: Model of monkey head
 	// 3: Model of monkey head with "custom shader"
-	// 4: TempleOS example scene
+	// 4: Gerstner waves (vertex shader example)
+	// 5: TempleOS example scene
 	public static final int CURRENT_STATE = 4;
 	
 	static int screenWidth = 1280;
@@ -62,6 +64,9 @@ public class Main {
 			currentGameState = new OBJModelShaderShowcaseState(window, renderer, input);
 			break;
 		case 4:
+			currentGameState = new GerstnerWavesShowcaseState(window, renderer, input);
+			break;
+		case 5:
 			currentGameState = new TempleOSShowcase(window, renderer, input);
 			break;
 		

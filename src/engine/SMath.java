@@ -23,6 +23,12 @@ public class SMath {
 	// Cosine as float
 	public static float Cos(float angle)
 	{
-		return (float)Math.cos(angle);
+		return (float) Math.cos(angle);
+	}
+	
+	// Sqrt as float
+	public static float Sqrt(float val)
+	{
+		return (float) Math.sqrt(val);
 	}
 }
