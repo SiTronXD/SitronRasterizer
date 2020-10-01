@@ -20,7 +20,7 @@ public class Main {
 	// 3: Model of monkey head with "custom shader"
 	// 4: Gerstner waves (vertex shader example)
 	// 5: TempleOS example scene
-	public static final int CURRENT_STATE = 4;
+	public static final int CURRENT_STATE = 0;
 	
 	static int screenWidth = 1280;
 	static int screenHeight = 720;
