@@ -1,6 +1,6 @@
 package game;
 
-import com.sun.glass.events.KeyEvent;
+import java.awt.event.KeyEvent;
 
 import engine.GameState;
 import engine.Input;
@@ -14,11 +14,11 @@ import gamestates.ShaderShowcaseState;
 import gamestates.TempleOSShowcase;
 
 public class Main {
-	// 0: Default quad mesh
-	// 1: Default quad mesh with "custom shader"
+	// 0: Default textured quad mesh
+	// 1: Default textured quad mesh with (fragment "shader" example)
 	// 2: Model of monkey head
-	// 3: Model of monkey head with "custom shader"
-	// 4: Gerstner waves (vertex shader example)
+	// 3: Model of monkey head with (fragment "shader" example)
+	// 4: Gerstner waves (vertex "shader" example)
 	// 5: TempleOS example scene
 	public static final int CURRENT_STATE = 0;
 	

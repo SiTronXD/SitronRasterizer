@@ -2,7 +2,7 @@ package gamestates;
 
 import java.util.Random;
 
-import com.sun.glass.events.KeyEvent;
+import java.awt.event.KeyEvent;
 
 import engine.GameState;
 import engine.Input;

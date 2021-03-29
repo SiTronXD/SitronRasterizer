@@ -1,7 +1,6 @@
 package gamestates;
 
-import com.sun.glass.events.KeyEvent;
-
+import java.awt.event.KeyEvent;
 import engine.GameState;
 import engine.Input;
 import engine.Matrix;
@@ -48,7 +47,7 @@ public class OBJModelShaderShowcaseState extends GameState
 				100.0f
 			);
 
-		testTexture = new Texture("./res/gfx/ThatsPoggersBro.png");
+		testTexture = new Texture("./res/gfx/castle_brick_02_red_diff_1k.png");
 	}
 
 	@Override
