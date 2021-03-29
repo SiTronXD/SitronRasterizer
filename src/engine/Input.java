@@ -4,8 +4,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 public class Input implements KeyListener {
-	boolean[] keysDown = new boolean[128];
-	boolean[] previousKeysDown = new boolean[128];
+	boolean[] keysDown = new boolean[256];
+	boolean[] previousKeysDown = new boolean[256];
 	
 	@Override
 	public void keyPressed(KeyEvent arg0) {
