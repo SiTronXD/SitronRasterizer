@@ -89,7 +89,7 @@ public class Renderer {
 		}
 		
 		// Back-face culling
-		if((renderFlags & RENDER_FLAGS_DISABLE_BACK_FACE_CULLING) != RENDER_FLAGS_DISABLE_BACK_FACE_CULLING)
+		if((renderFlags & RENDER_FLAGS_DISABLE_BACK_FACE_CULLING) == 0)
 		{
 			// Since all triangles after clipping lay on the same plane, we only need to check one single normal
 			Vector edge0 = new Vector(vertices.get(1).GetPosition()); edge0.Sub(vertices.get(0).GetPosition());
@@ -97,6 +97,12 @@ public class Renderer {
 			Vector normal = Vector.Cross(edge0, edge1);
 			if(normal.z >= 0.0) { return; }
 		}
+		
+		/*System.out.println("NDC: ");
+		System.out.println(vertices.get(0).m_position.GetString());
+		System.out.println(vertices.get(1).m_position.GetString());
+		System.out.println(vertices.get(2).m_position.GetString());
+		System.out.println(" ");*/
 		
 		// NDC space --> screen space
 		for(int i = 0; i < vertices.size(); i++)
@@ -107,7 +113,7 @@ public class Renderer {
 		for(int i = 0; i < vertices.size()-2; i++)
 		{
 			// Draw wireframe
-			if((renderFlags & RENDER_FLAGS_WIREFRAME) == RENDER_FLAGS_WIREFRAME)
+			if((renderFlags & RENDER_FLAGS_WIREFRAME) != 0)
 				DrawNonFilledTriangleOnScreen(vertices.get(0), vertices.get(i+1), vertices.get(i+2));
 			else
 				FillTriangleOnScreen(vertices.get(0), vertices.get(i+1), vertices.get(i+2), renderFlags);
@@ -127,13 +133,22 @@ public class Renderer {
 			return;
 		}
 		// This is the greatest flaw of the algorithm, since the triangle could potentially cover the screen even when the 
-		// vertices are outside the window's opposite sides. The triangle should still be rendered in that case.
+		// vertices are outside the window's sides. The triangle should still be rendered in that case.
 		else if(!v1InVF && !v2InVF && !v3InVF)
 		{
 			vertices.clear();
 			return;
-		}
 			
+			// I tried making sure the triangle didn't intersect the view frustum, but it didn't work all the time...
+			/*if(!IsIntersectingViewFrustum(vertices.get(0), vertices.get(1), vertices.get(2)))
+			{
+				vertices.clear();
+				return;
+			}
+			else
+				System.out.println("TRIANGLE IS OUTSIDE FRUSTUM");*/
+		}
+		
 		verticesToCheck.clear();
 		verticesToCheck.add(vertices.get(0));
 		verticesToCheck.add(vertices.get(1));
@@ -160,7 +175,7 @@ public class Renderer {
 				// One of the vertices are outside
 				if(currentInVF ^ lastInVF)
 				{
-					int componentIndex = (int)(checkAxis/2.0f);
+					int componentIndex = (int)(checkAxis * 0.5f);
 					float wScalar = (checkAxis == 5) ? 0.0f : 1.0f;
 					Vertex insideVertex = currentInVF ? currentVertex : lastVertex;
 					Vertex outsideVertex = !currentInVF ? currentVertex : lastVertex;
@@ -197,8 +212,10 @@ public class Renderer {
 		float differenceA = (vertA.m_position.w * Math.signum(vertB.m_position.GetComponent(componentIndex)) * wScalar) - vertA.m_position.GetComponent(componentIndex); 
 		float differenceB = (vertB.m_position.w * Math.signum(vertB.m_position.GetComponent(componentIndex)) * wScalar) - vertB.m_position.GetComponent(componentIndex);
 		
+		
 		// Find t-value on line
 		float t = differenceA / (differenceA - differenceB);
+		t = SMath.Clamp(t, 0.0f, 1.0f);
 		
 		// Create vertex
 		Vertex newVert = new Vertex();
@@ -207,9 +224,160 @@ public class Renderer {
 		return newVert;
 	}
 	
+	/*
+	boolean IsTriangleAABBIntersectingViewFrustum(Vertex in_v0, Vertex in_v1, Vertex in_v2)
+	{
+		// Avoid division by 0
+		if(in_v0.m_position.w == 0 || in_v1.m_position.w == 0 || in_v2.m_position.w == 0)
+			return false;
+		
+		Vector v0 = new Vertex(in_v0).m_position;
+		Vector v1 = new Vertex(in_v1).m_position;
+		Vector v2 = new Vertex(in_v2).m_position;
+		
+		float v0w = v0.w;
+		v0.Div(v0w, v0w, v0w, 1.0f);
+
+		float v1w = v1.w;
+		v1.Div(v1w, v1w, v1w, 1.0f);
+		
+		float v2w = v2.w;
+		v2.Div(v2w, v2w, v2w, 1.0f);
+		
+		// System.out.println(v0.GetString());
+		// System.out.println(v1.GetString());
+		// System.out.println(v2.GetString());
+		
+		Vector frustumCenter = new Vector(0.0f, 0.0f, 0.5f);
+		Vector frustumHalfSize = new Vector(1.0f, 1.0f, 0.5f);
+
+		v0.Sub(frustumCenter);
+		v1.Sub(frustumCenter);
+		v2.Sub(frustumCenter);
+		
+		Vector triMax = new Vector(
+			Math.max(Math.max(v0.x, v1.x), v2.x),
+			Math.max(Math.max(v0.y, v1.y), v2.y),
+			Math.max(Math.max(v0.z, v1.z), v2.z)
+		);
+		Vector triMin = new Vector(
+			Math.min(Math.min(v0.x, v1.x), v2.x),
+			Math.min(Math.min(v0.y, v1.y), v2.y),
+			Math.min(Math.min(v0.z, v1.z), v2.z)
+		);
+		Vector fruMax = new Vector(frustumCenter); fruMax.Add(frustumHalfSize);
+		Vector fruMin = new Vector(frustumCenter); fruMin.Sub(frustumHalfSize);
+		
+		
+		return 	triMax.x >= fruMin.x && triMin.x <= fruMax.x && 
+				triMax.y >= fruMin.y && triMin.y <= fruMax.y &&
+				triMax.z >= fruMin.z && triMin.z <= fruMax.z;
+	}
+	
+	boolean IsIntersectingViewFrustum(Vertex in_v0, Vertex in_v1, Vertex in_v2)
+	{
+		// Avoid division by 0
+		if(in_v0.m_position.w == 0 || in_v1.m_position.w == 0 || in_v2.m_position.w == 0)
+			return false;
+		
+		Vector v0 = new Vertex(in_v0).m_position;
+		Vector v1 = new Vertex(in_v1).m_position;
+		Vector v2 = new Vertex(in_v2).m_position;
+		
+		float v0w = v0.w;
+		v0.Div(v0w, v0w, v0w, 1.0f);
+
+		float v1w = v1.w;
+		v1.Div(v1w, v1w, v1w, 1.0f);
+		
+		float v2w = v2.w;
+		v2.Div(v2w, v2w, v2w, 1.0f);
+		
+		// System.out.println(v0.GetString());
+		// System.out.println(v1.GetString());
+		// System.out.println(v2.GetString());
+		
+		Vector frustumCenter = new Vector(0.0f, 0.0f, 0.5f);
+		Vector frustumHalfSize = new Vector(1.0f, 1.0f, 0.5f);
+
+		v0.Sub(frustumCenter);
+		v1.Sub(frustumCenter);
+		v2.Sub(frustumCenter);
+		
+		// Edges
+		Vector f0 = new Vector(v1); f0.Sub(v0);
+		Vector f1 = new Vector(v2); f1.Sub(v1);
+		Vector f2 = new Vector(v0); f2.Sub(v2);
+		
+		// Face normals
+		Vector u0 = new Vector(1.0f, 0.0f, 0.0f, 0.0f);
+		Vector u1 = new Vector(0.0f, 1.0f, 0.0f, 0.0f);
+		Vector u2 = new Vector(0.0f, 0.0f, 1.0f, 0.0f);
+		
+		// Axis
+		Vector axis_u0_f0 = Vector.Cross(u0, f0);//	axis_u0_f0.Scale(-1.0f);
+	    Vector axis_u0_f1 = Vector.Cross(u0, f1);//	axis_u0_f1.Scale(-1.0f);
+	    Vector axis_u0_f2 = Vector.Cross(u0, f2);//	axis_u0_f2.Scale(-1.0f);
+
+	    Vector axis_u1_f0 = Vector.Cross(u1, f0);//	axis_u1_f0.Scale(-1.0f);
+	    Vector axis_u1_f1 = Vector.Cross(u1, f1);//	axis_u1_f1.Scale(-1.0f);
+	    Vector axis_u1_f2 = Vector.Cross(u2, f2);//	axis_u1_f2.Scale(-1.0f);
+
+	    Vector axis_u2_f0 = Vector.Cross(u2, f0);//	axis_u2_f0.Scale(-1.0f);
+	    Vector axis_u2_f1 = Vector.Cross(u2, f1);//	axis_u2_f1.Scale(-1.0f);
+	    Vector axis_u2_f2 = Vector.Cross(u2, f2);//	axis_u2_f2.Scale(-1.0f);
+	    
+	    // Testing
+	    boolean axisAreCorrect = 	TestAxis(v0, v1, v2, u0, u1, u2, axis_u0_f0, frustumHalfSize) && 
+	    							TestAxis(v0, v1, v2, u0, u1, u2, axis_u0_f1, frustumHalfSize) && 
+	    							TestAxis(v0, v1, v2, u0, u1, u2, axis_u0_f2, frustumHalfSize) && 
+	    						
+	    							TestAxis(v0, v1, v2, u0, u1, u2, axis_u1_f0, frustumHalfSize) && 
+	    							TestAxis(v0, v1, v2, u0, u1, u2, axis_u1_f1, frustumHalfSize) && 
+	    							TestAxis(v0, v1, v2, u0, u1, u2, axis_u1_f2, frustumHalfSize) &&
+	    						
+	    							TestAxis(v0, v1, v2, u0, u1, u2, axis_u2_f0, frustumHalfSize) && 
+	    							TestAxis(v0, v1, v2, u0, u1, u2, axis_u2_f1, frustumHalfSize) && 
+	    							TestAxis(v0, v1, v2, u0, u1, u2, axis_u2_f2, frustumHalfSize);
+	    
+	    if(!axisAreCorrect)
+	    	return false;
+	    
+	    System.out.println("axisAreCorrect");
+	    
+	    boolean normalsAreCorrect = TestAxis(v0, v1, v2, u0, u1, u2, u0, frustumHalfSize) && 
+	    							TestAxis(v0, v1, v2, u0, u1, u2, u1, frustumHalfSize) && 
+	    							TestAxis(v0, v1, v2, u0, u1, u2, u2, frustumHalfSize);
+	    
+	    if(!normalsAreCorrect)
+	    	return false;
+
+	    System.out.println("normalsAreCorrect");
+	    
+	    
+		Vector axis_f0_f1 = Vector.Cross(f0, f1);
+		return TestAxis(v0, v1, v2, u0, u1, u2, axis_f0_f1, frustumHalfSize);
+	}*/
+	
+	boolean TestAxis(Vector v0, Vector v1, Vector v2, Vector u0, Vector u1, Vector u2, Vector axis, Vector boxHalfSize)
+	{
+		float p0 = Vector.Dot(v0, axis);
+		float p1 = Vector.Dot(v1, axis);
+		float p2 = Vector.Dot(v2, axis);
+		
+		float r = 	boxHalfSize.x * Math.abs(Vector.Dot(u0, axis)) + 
+					boxHalfSize.y * Math.abs(Vector.Dot(u1, axis)) +
+					boxHalfSize.z * Math.abs(Vector.Dot(u2, axis));
+		
+		if (Math.max(-Math.max(Math.max(p0, p1), p2), Math.min(Math.min(p0, p1), p2)) > r)
+	        return false;
+		
+		return true;
+	}
+	
 	public void FillTriangleOnScreen(Vertex v1, Vertex v2, Vertex v3, int renderFlags)
 	{
-		boolean lerpPerspCorrect = (renderFlags & RENDER_FLAGS_NON_PERSPECTIVE_CORRECT_INTERPOLATION) != RENDER_FLAGS_NON_PERSPECTIVE_CORRECT_INTERPOLATION;
+		boolean lerpPerspCorrect = (renderFlags & RENDER_FLAGS_NON_PERSPECTIVE_CORRECT_INTERPOLATION) == 0;
 		
 		// Sort vertices
 		Vertex[] sortedVertices = SortVertices(v1, v2, v3);

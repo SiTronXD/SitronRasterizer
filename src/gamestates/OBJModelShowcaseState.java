@@ -12,6 +12,7 @@ import engine.Vector;
 import engine.Vertex;
 import engine.Window;
 import engine.shaders.ChromaticAberrationShader;
+import engine.shaders.DefaultShader;
 import game.Camera;
 
 public class OBJModelShowcaseState extends GameState 
@@ -46,6 +47,9 @@ public class OBJModelShowcaseState extends GameState
 			);
 
 		testTexture = new Texture("./res/gfx/castle_brick_02_red_diff_1k.png");
+
+		// Set to default shader
+		renderer.SetShader(new DefaultShader());
 	}
 
 	@Override

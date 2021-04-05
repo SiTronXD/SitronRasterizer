@@ -165,12 +165,14 @@ public class Vector {
 	// Interpolate between two vectors, based on a scalar t, with respect to the vertices non-linear depth
 	public static Vector PerspectiveCorrectLerp(Vector v1, Vector v2, float depth1, float depth2, float t)
 	{
-		float denominator = ((1.0f - t)/depth1 + t/depth2); 
-		
-		float x = ((1.0f - t) * v1.x/depth1 + t*v2.x/depth2) / denominator;
-		float y = ((1.0f - t) * v1.y/depth1 + t*v2.y/depth2) / denominator;
-		float z = ((1.0f - t) * v1.z/depth1 + t*v2.z/depth2) / denominator;
-		float w = ((1.0f - t) * v1.w/depth1 + t*v2.w/depth2) / denominator;
+		float leftSideScale = (1.0f - t) / depth1;
+		float rightSideScale = t / depth2;
+		float denominator = leftSideScale + rightSideScale; 
+
+		float x = (leftSideScale * v1.x + rightSideScale * v2.x) / denominator;
+		float y = (leftSideScale * v1.y + rightSideScale * v2.y) / denominator;
+		float z = (leftSideScale * v1.z + rightSideScale * v2.z) / denominator;
+		float w = (leftSideScale * v1.w + rightSideScale * v2.w) / denominator;
 		
 		return new Vector(x, y, z, w);
 	}
@@ -187,9 +189,9 @@ public class Vector {
 	// Interpolate between two vectors, based on a scalar t, with respect to the vertices non-linear depth
 	public static void PerspectiveCorrectLerp(Vector v1, Vector v2, float depth1, float depth2, float t, Vector newInfoVector)
 	{
-		float denominator = ((1.0f - t)/depth1 + t/depth2); 
 		float leftSideScale = (1.0f - t) / depth1;
 		float rightSideScale = t / depth2;
+		float denominator = leftSideScale + rightSideScale; 
 		
 		newInfoVector.x = (leftSideScale * v1.x + rightSideScale * v2.x) / denominator;
 		newInfoVector.y = (leftSideScale * v1.y + rightSideScale * v2.y) / denominator;

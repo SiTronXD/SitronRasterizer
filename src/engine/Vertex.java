@@ -50,6 +50,11 @@ public class Vertex {
 		oldVertex.m_position = newPos;
 	}
 	
+	public static boolean IsIntersectingViewFrustum(Vector v)
+	{
+		return true;
+	}
+	
 	public static boolean IsInsideViewFrustum(Vector transformedVertexPosition)
 	{
 		return 	Math.abs(transformedVertexPosition.x) <= Math.abs(transformedVertexPosition.w) && 
@@ -63,7 +68,7 @@ public class Vertex {
 		boolean checkPositive = checkAxis % 2 == 0;
 		
 		// Compare component to w-value as you would expect
-		if(checkAxis < 2*2+1) // component * side 
+		if(checkAxis < 5)
 		{
 			if(checkPositive)
 				return transformedVertexPosition.GetComponent(component) <= transformedVertexPosition.w;

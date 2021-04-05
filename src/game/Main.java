@@ -14,13 +14,13 @@ import gamestates.ShaderShowcaseState;
 import gamestates.TempleOSShowcase;
 
 public class Main {
-	// 0: Default textured quad mesh
-	// 1: Default textured quad mesh with (fragment "shader" example)
-	// 2: Model of monkey head
-	// 3: Model of monkey head with (fragment "shader" example)
-	// 4: Gerstner waves (vertex "shader" example)
-	// 5: TempleOS example scene
-	public static final int CURRENT_STATE = 0;
+	// 1: Default textured quad mesh
+	// 2: Default textured quad mesh with (fragment "shader" example)
+	// 3: Model of monkey head
+	// 4: Model of monkey head with (fragment "shader" example)
+	// 5: Gerstner waves (vertex "shader" example)
+	// 6: TempleOS example scene
+	public static final int INITIAL_STATE = 1;
 	
 	static int screenWidth = 1280;
 	static int screenHeight = 720;
@@ -49,32 +49,7 @@ public class Main {
 		window.SetKeyListener(input);
 		
 		// Change state
-		switch(CURRENT_STATE)
-		{
-		case 0:
-			currentGameState = new DefaultQuadShowcaseState(window, renderer, input);
-			break;
-		case 1:
-			currentGameState = new ShaderShowcaseState(window, renderer, input);
-			break;
-		case 2:
-			currentGameState = new OBJModelShowcaseState(window, renderer, input);
-			break;
-		case 3:
-			currentGameState = new OBJModelShaderShowcaseState(window, renderer, input);
-			break;
-		case 4:
-			currentGameState = new GerstnerWavesShowcaseState(window, renderer, input);
-			break;
-		case 5:
-			currentGameState = new TempleOSShowcase(window, renderer, input);
-			break;
-		
-		default:
-			currentGameState = new DefaultQuadShowcaseState(window, renderer, input);
-			break;
-		}
-		
+		SetState(INITIAL_STATE);
 		
 		// Main loop
 		lastTime = System.nanoTime();
@@ -89,6 +64,20 @@ public class Main {
 			if(input.GetKeyDown(KeyEvent.VK_ESCAPE))
 				running = false;
 			
+			// Switch state
+			if(input.GetKeyDown(KeyEvent.VK_1))
+				SetState(1);
+			else if(input.GetKeyDown(KeyEvent.VK_2))
+				SetState(2);
+			else if(input.GetKeyDown(KeyEvent.VK_3))
+				SetState(3);
+			else if(input.GetKeyDown(KeyEvent.VK_4))
+				SetState(4);
+			else if(input.GetKeyDown(KeyEvent.VK_5))
+				SetState(5);
+			else if(input.GetKeyDown(KeyEvent.VK_6))
+				SetState(6);
+			
 			// Update and render game state
 			currentGameState.Update((float) deltaTime);
 			currentGameState.Render(renderer);
@@ -100,6 +89,36 @@ public class Main {
 		
 		// Exit
 		System.exit(0);
+	}
+	
+	// Sets the current state
+	void SetState(int newState)
+	{
+		switch(newState)
+		{
+		case 1:
+			currentGameState = new DefaultQuadShowcaseState(window, renderer, input);
+			break;
+		case 2:
+			currentGameState = new ShaderShowcaseState(window, renderer, input);
+			break;
+		case 3:
+			currentGameState = new OBJModelShowcaseState(window, renderer, input);
+			break;
+		case 4:
+			currentGameState = new OBJModelShaderShowcaseState(window, renderer, input);
+			break;
+		case 5:
+			currentGameState = new GerstnerWavesShowcaseState(window, renderer, input);
+			break;
+		case 6:
+			currentGameState = new TempleOSShowcase(window, renderer, input);
+			break;
+		
+		default:
+			currentGameState = new DefaultQuadShowcaseState(window, renderer, input);
+			break;
+		}
 	}
 	
 	void UpdateTimeStats()

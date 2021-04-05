@@ -10,6 +10,7 @@ import engine.Texture;
 import engine.Vector;
 import engine.Vertex;
 import engine.Window;
+import engine.shaders.DefaultShader;
 import game.Camera;
 
 public class DefaultQuadShowcaseState extends GameState 
@@ -37,16 +38,21 @@ public class DefaultQuadShowcaseState extends GameState
 		v2 = new Vertex(new Vector(-0.5f, -0.5f, 0.0f), new Vector(0, 255, 0), new Vector(0.0f, 1.0f), new Vector(0.0f, 0.0f, -1.0f));
 		v3 = new Vertex(new Vector( 0.5f, -0.5f, 0.0f), new Vector(0, 0, 255), new Vector(1.0f, 1.0f), new Vector(0.0f, 0.0f, -1.0f));
 		v4 = new Vertex(new Vector( 0.5f,  0.5f, 0.0f), new Vector(255, 255, 0), new Vector(1.0f, 0.0f), new Vector(0.0f, 0.0f, -1.0f));
+		
 		quadMesh = new Mesh(new Vertex[]{ v1, v2, v3, v4 }, new int[]{ 0, 1, 2, 0, 2, 3 });
+		//quadMesh = new Mesh(new Vertex[]{ v1, v2, v3, v4 }, new int[]{ 0, 1, 3, 1, 2, 3 });
 		
 		perspectiveTransform = Matrix.Perspective(
 				(float)window.getWidth() / (float)window.getHeight(), 
 				(float) Math.toRadians(90.0f), 
 				0.1f, 
-				100.0f
+				10.0f
 			);
 
 		testTexture = new Texture("./res/gfx/castle_brick_02_red_diff_1k.png");
+		
+		// Set to default shader
+		renderer.SetShader(new DefaultShader());
 	}
 
 	@Override
@@ -86,6 +92,7 @@ public class DefaultQuadShowcaseState extends GameState
 		camera.Move(r, u, f);
 		
 		meshTransform = Matrix.Identity();
+		meshTransform = Matrix.MatMatMul(Matrix.Scale(3.0f, 3.0f, 3.0f), meshTransform);
 		meshTransform = Matrix.MatMatMul(Matrix.Translate(0.0f, 0.0f, 1.6f), meshTransform);
 		meshTransform = Matrix.MatMatMul(camera.GetViewMat(), meshTransform);
 		meshTransform = Matrix.MatMatMul(perspectiveTransform, meshTransform);

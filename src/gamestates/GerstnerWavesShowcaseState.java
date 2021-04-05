@@ -33,6 +33,8 @@ public class GerstnerWavesShowcaseState extends GameState
 	@Override
 	public void Init() {
 		camera = new Camera();
+		camera.Move(0.0f, 0.0f, 0.5f);
+		camera.Rotate(0.0f, -0.2f);
 		
 		// Create plane mesh
 		int planeRes = 50;
@@ -51,7 +53,7 @@ public class GerstnerWavesShowcaseState extends GameState
 			x -= 0.5f;	// From -0.5 to 0.5
 			z -= 0.5f;  // From -0.5 to 0.5
 			
-			planeVertices[i] = new Vertex(new Vector(x,  -1.0f, z), new Vector(150, 150, 230), new Vector(0.0f, 0.0f), new Vector(0.0f, 1.0f, 0.0f));
+			planeVertices[i] = new Vertex(new Vector(x,  -0.7f, z), new Vector(150, 150, 230), new Vector(0.0f, 0.0f), new Vector(0.0f, 1.0f, 0.0f));
 		}
 		
 		// Plane indices
