@@ -136,17 +136,12 @@ public class Renderer {
 		// vertices are outside the window's sides. The triangle should still be rendered in that case.
 		else if(!v1InVF && !v2InVF && !v3InVF)
 		{
-			vertices.clear();
-			return;
-			
-			// I tried making sure the triangle didn't intersect the view frustum, but it didn't work all the time...
-			/*if(!IsIntersectingViewFrustum(vertices.get(0), vertices.get(1), vertices.get(2)))
+			// Make sure no part of the triangle is visible. (This is somewhat slower than using a different/modified clipping algorithm)
+			if(!IsTriangleIntersectingViewFrustum(vertices.get(0), vertices.get(1), vertices.get(2)))
 			{
 				vertices.clear();
 				return;
 			}
-			else
-				System.out.println("TRIANGLE IS OUTSIDE FRUSTUM");*/
 		}
 		
 		verticesToCheck.clear();
@@ -224,8 +219,7 @@ public class Renderer {
 		return newVert;
 	}
 	
-	/*
-	boolean IsTriangleAABBIntersectingViewFrustum(Vertex in_v0, Vertex in_v1, Vertex in_v2)
+	/*boolean IsTriangleAABBIntersectingViewFrustum(Vertex in_v0, Vertex in_v1, Vertex in_v2)
 	{
 		// Avoid division by 0
 		if(in_v0.m_position.w == 0 || in_v1.m_position.w == 0 || in_v2.m_position.w == 0)
@@ -235,13 +229,13 @@ public class Renderer {
 		Vector v1 = new Vertex(in_v1).m_position;
 		Vector v2 = new Vertex(in_v2).m_position;
 		
-		float v0w = v0.w;
+		float v0w = Math.abs(v0.w);
 		v0.Div(v0w, v0w, v0w, 1.0f);
 
-		float v1w = v1.w;
+		float v1w = Math.abs(v1.w);
 		v1.Div(v1w, v1w, v1w, 1.0f);
 		
-		float v2w = v2.w;
+		float v2w = Math.abs(v2.w);
 		v2.Div(v2w, v2w, v2w, 1.0f);
 		
 		// System.out.println(v0.GetString());
@@ -272,9 +266,9 @@ public class Renderer {
 		return 	triMax.x >= fruMin.x && triMin.x <= fruMax.x && 
 				triMax.y >= fruMin.y && triMin.y <= fruMax.y &&
 				triMax.z >= fruMin.z && triMin.z <= fruMax.z;
-	}
+	}*/
 	
-	boolean IsIntersectingViewFrustum(Vertex in_v0, Vertex in_v1, Vertex in_v2)
+	boolean IsTriangleIntersectingViewFrustum(Vertex in_v0, Vertex in_v1, Vertex in_v2)
 	{
 		// Avoid division by 0
 		if(in_v0.m_position.w == 0 || in_v1.m_position.w == 0 || in_v2.m_position.w == 0)
@@ -284,13 +278,13 @@ public class Renderer {
 		Vector v1 = new Vertex(in_v1).m_position;
 		Vector v2 = new Vertex(in_v2).m_position;
 		
-		float v0w = v0.w;
+		float v0w = Math.abs(v0.w);
 		v0.Div(v0w, v0w, v0w, 1.0f);
 
-		float v1w = v1.w;
+		float v1w = Math.abs(v1.w);
 		v1.Div(v1w, v1w, v1w, 1.0f);
 		
-		float v2w = v2.w;
+		float v2w = Math.abs(v2.w);
 		v2.Div(v2w, v2w, v2w, 1.0f);
 		
 		// System.out.println(v0.GetString());
@@ -327,7 +321,7 @@ public class Renderer {
 	    Vector axis_u2_f1 = Vector.Cross(u2, f1);//	axis_u2_f1.Scale(-1.0f);
 	    Vector axis_u2_f2 = Vector.Cross(u2, f2);//	axis_u2_f2.Scale(-1.0f);
 	    
-	    // Testing
+	    // Testing axis
 	    boolean axisAreCorrect = 	TestAxis(v0, v1, v2, u0, u1, u2, axis_u0_f0, frustumHalfSize) && 
 	    							TestAxis(v0, v1, v2, u0, u1, u2, axis_u0_f1, frustumHalfSize) && 
 	    							TestAxis(v0, v1, v2, u0, u1, u2, axis_u0_f2, frustumHalfSize) && 
@@ -343,8 +337,9 @@ public class Renderer {
 	    if(!axisAreCorrect)
 	    	return false;
 	    
-	    System.out.println("axisAreCorrect");
+	    //System.out.println("axisAreCorrect");
 	    
+	    // Testing normal
 	    boolean normalsAreCorrect = TestAxis(v0, v1, v2, u0, u1, u2, u0, frustumHalfSize) && 
 	    							TestAxis(v0, v1, v2, u0, u1, u2, u1, frustumHalfSize) && 
 	    							TestAxis(v0, v1, v2, u0, u1, u2, u2, frustumHalfSize);
@@ -352,12 +347,12 @@ public class Renderer {
 	    if(!normalsAreCorrect)
 	    	return false;
 
-	    System.out.println("normalsAreCorrect");
+	    //System.out.println("normalsAreCorrect");
 	    
-	    
+	    // Testing triangle normal
 		Vector axis_f0_f1 = Vector.Cross(f0, f1);
 		return TestAxis(v0, v1, v2, u0, u1, u2, axis_f0_f1, frustumHalfSize);
-	}*/
+	}
 	
 	boolean TestAxis(Vector v0, Vector v1, Vector v2, Vector u0, Vector u1, Vector u2, Vector axis, Vector boxHalfSize)
 	{

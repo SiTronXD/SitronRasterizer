@@ -40,7 +40,7 @@ public class DefaultQuadShowcaseState extends GameState
 		v4 = new Vertex(new Vector( 0.5f,  0.5f, 0.0f), new Vector(255, 255, 0), new Vector(1.0f, 0.0f), new Vector(0.0f, 0.0f, -1.0f));
 		
 		quadMesh = new Mesh(new Vertex[]{ v1, v2, v3, v4 }, new int[]{ 0, 1, 2, 0, 2, 3 });
-		//quadMesh = new Mesh(new Vertex[]{ v1, v2, v3, v4 }, new int[]{ 0, 1, 3, 1, 2, 3 });
+		//quadMesh = new Mesh(new Vertex[]{ v1, v2, v3, v4 }, new int[]{ 0, 1, 3/*, 1, 2, 3*/ });
 		
 		perspectiveTransform = Matrix.Perspective(
 				(float)window.getWidth() / (float)window.getHeight(), 
