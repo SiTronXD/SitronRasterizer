@@ -26,4 +26,4 @@ A first-person camera can be controlled when running the project. "WASDEQ" keys 
 # Screenshots
 ![github-small](res/gfx/Showcase2.png)
 ![github-small](res/gfx/Showcase3.png)
-![github-small](res/gfx/Showcase4.png)
+![github-small](res/gfx/Showcase5.png)
