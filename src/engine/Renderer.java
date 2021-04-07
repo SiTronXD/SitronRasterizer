@@ -132,17 +132,6 @@ public class Renderer {
 		{
 			return;
 		}
-		// This is the greatest flaw of the algorithm, since the triangle could potentially cover the screen even when the 
-		// vertices are outside the window's sides. The triangle should still be rendered in that case.
-		else if(!v1InVF && !v2InVF && !v3InVF)
-		{
-			// Make sure no part of the triangle is visible. (This is somewhat slower than using a different/modified clipping algorithm)
-			if(!IsTriangleIntersectingViewFrustum(vertices.get(0), vertices.get(1), vertices.get(2)))
-			{
-				vertices.clear();
-				return;
-			}
-		}
 		
 		verticesToCheck.clear();
 		verticesToCheck.add(vertices.get(0));
@@ -268,7 +257,7 @@ public class Renderer {
 				triMax.z >= fruMin.z && triMin.z <= fruMax.z;
 	}*/
 	
-	boolean IsTriangleIntersectingViewFrustum(Vertex in_v0, Vertex in_v1, Vertex in_v2)
+	/*boolean IsTriangleIntersectingViewFrustum(Vertex in_v0, Vertex in_v1, Vertex in_v2)
 	{
 		// Avoid division by 0
 		if(in_v0.m_position.w == 0 || in_v1.m_position.w == 0 || in_v2.m_position.w == 0)
@@ -352,7 +341,7 @@ public class Renderer {
 	    // Testing triangle normal
 		Vector axis_f0_f1 = Vector.Cross(f0, f1);
 		return TestAxis(v0, v1, v2, u0, u1, u2, axis_f0_f1, frustumHalfSize);
-	}
+	}*/
 	
 	boolean TestAxis(Vector v0, Vector v1, Vector v2, Vector u0, Vector u1, Vector u2, Vector axis, Vector boxHalfSize)
 	{
