@@ -87,8 +87,7 @@ public class Renderer {
 		// Perspective divide
 		for(int i = 0; i < vertices.size(); i++)
 		{
-			float w = vertices.get(i).GetPosition().w;
-			vertices.get(i).GetPosition().Div(w, w, w, 1.0f);
+			PerspectiveDivideVertex(vertices.get(i));
 		}
 		
 		// Back-face culling
@@ -141,8 +140,8 @@ public class Renderer {
 		verticesToCheck.add(vertices.get(1));
 		verticesToCheck.add(vertices.get(2));
 		
-		
-		for(int checkAxis = 0; checkAxis < 6; checkAxis++)
+		// Start clipping against near plane to avoid negative w-values when clipping agains the other planes
+		for(int checkAxis = 5; checkAxis >= 0; checkAxis--)
 		{
 			if(verticesToCheck.size() <= 0)
 				break;
@@ -179,19 +178,6 @@ public class Renderer {
 				lastVertex = currentVertex;
 				lastInVF = currentInVF;
 			}
-			
-			// Debug new vertex positions after perspective division
-			/*ArrayList<Vertex> debuggingVertices = new ArrayList<Vertex>();
-			for(int i = 0; i < currentSetOfVertices.size(); i++)
-			{
-				debuggingVertices.add(new Vertex(currentSetOfVertices.get(i)));
-				debuggingVertices.get(i).m_position.Div(
-						currentSetOfVertices.get(i).m_position.w,
-						currentSetOfVertices.get(i).m_position.w,
-						currentSetOfVertices.get(i).m_position.w,
-						1.0f
-				);
-			}*/
 			
 			// Start over with current vertices
 			verticesToCheck.clear();
@@ -687,6 +673,12 @@ public class Renderer {
 		}
 		
 		return new Vertex[] { v1, v2, v3 };
+	}
+	
+	private void PerspectiveDivideVertex(Vertex vert)
+	{
+		float w = vert.m_position.w;
+		vert.m_position.Div(w, w, w, 1.0f);
 	}
 	
 	// Clear render texture using a color
