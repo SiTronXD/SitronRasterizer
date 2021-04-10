@@ -10,9 +10,12 @@ public class Renderer {
 	public static final int RENDER_FLAGS_WIREFRAME = 1;
 	public static final int RENDER_FLAGS_NON_PERSPECTIVE_CORRECT_INTERPOLATION = 2;
 	public static final int RENDER_FLAGS_DISABLE_BACK_FACE_CULLING = 4;
+
+	private static final float EPSILON = 0.001f;
 	
 	int m_width;
 	int m_height;
+	
 	
 	double[] m_depthBuffer;
 	
@@ -95,7 +98,7 @@ public class Renderer {
 			Vector edge0 = new Vector(vertices.get(1).GetPosition()); edge0.Sub(vertices.get(0).GetPosition());
 			Vector edge1 = new Vector(vertices.get(2).GetPosition()); edge1.Sub(vertices.get(0).GetPosition());
 			Vector normal = Vector.Cross(edge0, edge1);
-			if(normal.z >= 0.0) { return; }
+			if(normal.z >= EPSILON) { return; }
 		}
 		
 		/*System.out.println("NDC: ");
@@ -148,13 +151,13 @@ public class Renderer {
 			
 			// Last vertex
 			Vertex lastVertex = verticesToCheck.get(verticesToCheck.size()-1);
-			boolean lastInVF = Vertex.IsInsideViewAxis(lastVertex.GetPosition(), checkAxis);
+			boolean lastInVF = Vertex.IsInsideViewPlaneAxis(lastVertex.GetPosition(), checkAxis);
 			
 			// Go through each vertex in each "line"
 			for(int i = 0; i < verticesToCheck.size(); i++)
 			{
 				Vertex currentVertex = verticesToCheck.get(i);
-				boolean currentInVF = Vertex.IsInsideViewAxis(currentVertex.GetPosition(), checkAxis);
+				boolean currentInVF = Vertex.IsInsideViewPlaneAxis(currentVertex.GetPosition(), checkAxis);
 				
 				// One of the vertices are outside
 				if(currentInVF ^ lastInVF)
@@ -176,6 +179,19 @@ public class Renderer {
 				lastVertex = currentVertex;
 				lastInVF = currentInVF;
 			}
+			
+			// Debug new vertex positions after perspective division
+			/*ArrayList<Vertex> debuggingVertices = new ArrayList<Vertex>();
+			for(int i = 0; i < currentSetOfVertices.size(); i++)
+			{
+				debuggingVertices.add(new Vertex(currentSetOfVertices.get(i)));
+				debuggingVertices.get(i).m_position.Div(
+						currentSetOfVertices.get(i).m_position.w,
+						currentSetOfVertices.get(i).m_position.w,
+						currentSetOfVertices.get(i).m_position.w,
+						1.0f
+				);
+			}*/
 			
 			// Start over with current vertices
 			verticesToCheck.clear();

@@ -1,6 +1,8 @@
 package engine;
 
 public class Vertex {
+	private static final float EPSILON = 0.001f;
+	
 	public Vector m_position;
 	public Vector m_color;
 	public Vector m_texCoord;
@@ -50,11 +52,6 @@ public class Vertex {
 		oldVertex.m_position = newPos;
 	}
 	
-	public static boolean IsIntersectingViewFrustum(Vector v)
-	{
-		return true;
-	}
-	
 	public static boolean IsInsideViewFrustum(Vector transformedVertexPosition)
 	{
 		return 	Math.abs(transformedVertexPosition.x) <= Math.abs(transformedVertexPosition.w) && 
@@ -62,26 +59,16 @@ public class Vertex {
 				transformedVertexPosition.z <= transformedVertexPosition.w && transformedVertexPosition.z >= 0.0f;
 	}
 	
-	public static boolean IsInsideViewAxis(Vector transformedVertexPosition, int checkAxis)
+	public static boolean IsInsideViewPlaneAxis(Vector transformedVertexPosition, int checkAxis)
 	{
 		int component = (int)(checkAxis/2.0f);
 		boolean checkPositive = checkAxis % 2 == 0;
+		float isNotZNear = checkAxis != 5 ? 1.0f : 0.0f;
 		
-		// Compare component to w-value as you would expect
-		if(checkAxis < 5)
-		{
-			if(checkPositive)
-				return transformedVertexPosition.GetComponent(component) <= transformedVertexPosition.w;
-			else
-				return transformedVertexPosition.GetComponent(component) >= -transformedVertexPosition.w;
-		}
-		// Compare z-value to 0
-		else if(checkAxis == 5)
-		{
-			return transformedVertexPosition.GetComponent(component) >= 0.0f;
-		}
-		
-		return true;
+		if(checkPositive)
+			return transformedVertexPosition.GetComponent(component) - EPSILON <= transformedVertexPosition.w;
+		else
+			return transformedVertexPosition.GetComponent(component) + EPSILON >= -transformedVertexPosition.w * isNotZNear;
 	}
 	
 	public static void Lerp(Vertex v1, Vertex v2, float t, Vertex newInfoVertex)
@@ -99,10 +86,7 @@ public class Vertex {
 		float depth1 = v1.GetPosition().w;
 		float depth2 = v2.GetPosition().w;
 		
-		// Don't perspective correct lerp position, 
-		// since the z-position is already correct
-		Vector.Lerp(v1.GetPosition(), v2.GetPosition(), t, newInfoVertex.m_position); 
-		
+		Vector.PerspectiveCorrectLerp(v1.GetPosition(), v2.GetPosition(), depth1, depth2, t, newInfoVertex.m_position);
 		Vector.PerspectiveCorrectLerp(v1.GetColor(), v2.GetColor(), depth1, depth2, t, newInfoVertex.m_color);
 		Vector.PerspectiveCorrectLerp(v1.GetTexCoord(), v2.GetTexCoord(), depth1, depth2, t, newInfoVertex.m_texCoord);
 		Vector.PerspectiveCorrectLerp(v1.GetNormal(), v2.GetNormal(), depth1, depth2, t, newInfoVertex.m_normal);
