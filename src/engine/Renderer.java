@@ -505,9 +505,12 @@ public class Renderer {
 		// Draw the points
 		for(int i = 0; i < allLinePoints.size(); i++)
 		{
+			int clampedX = (int) SMath.Clamp((int) allLinePoints.get(i).x, 0, m_width - 1);
+			int clampedY = (int) SMath.Clamp((int) allLinePoints.get(i).y, 0, m_height - 1);
+			
 			m_renderTexture.SetPixel(
-				(int) allLinePoints.get(i).x, 
-				(int) allLinePoints.get(i).y, 
+				clampedX, 
+				clampedY, 
 				255, 
 				255, 
 				255, 
