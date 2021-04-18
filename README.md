@@ -9,7 +9,7 @@ The goal of this project was for me to learn about the fundamentals of rasteriza
 * Load and render OBJ-models
 * Custom functions for applying calculations on vertices and pixels, similar to shaders but on the CPU
 
-# The Scene
+# The Scenes
 The project contains six scenes to showcase different aspects of the engine:
 1. Textured quad to easier visualise clipping
 2. Textured quad rendered using a "CPU pixel shader"
