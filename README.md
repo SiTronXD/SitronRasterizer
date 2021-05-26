@@ -15,7 +15,7 @@ The project contains six scenes to showcase different aspects of the engine:
 2. Textured quad rendered using a "CPU pixel shader"
 3. Monkey head loaded from an OBJ-file
 4. Monkey head rendered using a "CPU pixel shader"
-5. Gerstner waves using a "CPU vertex shader"
+5. Wave animation inspired by Gerstner waves using a "CPU vertex shader"
 6. A TempleOS animation. (It was implemented mostly because I thought the dithered shading looked interesting)
 
 # Running the Project
